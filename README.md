@@ -25,7 +25,6 @@ install.packages("scprep", repos=NULL, type="source")
 
 #### Annotation
 Specify the sample metadata - view the annotation file here: [scprep_annotation.csv](inst/extdata/scprep_annotation.csv) (click "Raw file" at the top right to download)
-* The first 4 columns of **scprep_annotation.csv** can be copied directly from the project-specific **SampleSheet.csv**
 * Column 1: "Sample_ID" corresponds to the name of each sample
 * Column 2: "Index" corresponds to the name of the PCR index used during library preparation
 * Column 3: "Sample_Project" corresponds to the name of the project affiliated with all samples
@@ -43,7 +42,6 @@ Specify the pipeline parameters - view the parameters file here: [scprep_paramet
 Define the input directory (*dir_input*), which must contain a subdirectory named after each sample. The input directory (*dir_input*) must also contain the following files produced by 10X Genomics' *Cell Ranger* pipeline:
 
 * **filtered_feature_matrix_bc.h5** (the filtered gene counts matrix for each sample)
-* **possorted_genome_bam.bam** (the BAM file for each sample)
 
 ***
 
