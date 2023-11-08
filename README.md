@@ -47,9 +47,7 @@ Define the input directory (*dir_input*), which must contain a subdirectory name
 
 ***
 
-# Modules
-
-## 1) Build Dataset
+## Overview
 
 Template function to aggregate gene counts matrices from multiple samples, store aggregated counts matrices and metadata (for samples and genes) in an "ExpressionSet" S4 object, perform cell filtering, and calculate select QC metrics.
 ```
