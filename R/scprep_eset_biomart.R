@@ -34,12 +34,6 @@ scprep_eset_biomart <- function(
 		data(biomart_annotation_ens_98, package="scprep")
 		biomart_annotation <- biomart_annotation_ens_98
 		#
-	} else if (reference == "refdata-gex-mm10-2020-A") {
-		#
-		cat("Retrieve Annotation for mmusculus Ensembl 98", "\n")			
-		data(biomart_annotation_ens_98_mm10, package="scprep")
-		biomart_annotation <- biomart_annotation_ens_98_mm10
-		#
 	}
 	#
  	for (fdata in colnames(biomart_annotation)) {
