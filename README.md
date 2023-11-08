@@ -65,7 +65,7 @@ Core functions include:
 
 * Assign barcodes the status of "Dead" if a high percentage of total transcripts are derived from mitochondrial genes ("max_mito" fraction specified in parameters.csv). Assign barcodes the status of "Debris" if low numbers of total transcripts or genes were detected per cell ("min_umi" and "min_gene" specified in parameters.csv). Assign barcodes the status of "Cell" if percent mitochondrial transcripts is less than "max_mito" and if total transcripts is greater than "min_umi".
 
-* Select genes with at least 3 transcript counts in 0.1% of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object.
+* Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object.
 
 * Save ExpressionSet object in *dir_output*
 
