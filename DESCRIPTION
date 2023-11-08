@@ -1,5 +1,5 @@
 Package: scprep
-Title: R package for aggregating single-cell RNA-Seq data and metadata in a ExpressionSet container object, plus biomaRt gene annotation and basic cell filtering
+Title: An R package for aggregating single-cell RNA-Seq data and metadata in an ExpressionSet object, along with biomaRt gene annotation and basic cell filtering
 Version: 1.0
 Authors@R: 
     person("Grant", "Duclos", , "grant.duclos@gmail.com", role = c("aut", "cre"),

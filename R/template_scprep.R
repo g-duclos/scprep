@@ -16,7 +16,7 @@ template_scprep <- function(
 	#scprep_load_startup_message(load=TRUE);
 	#
 	cat(paste(Sys.time()), "\n")
-	cat("Module 1: Build Dataset", "\n")
+	cat("Build ExpressionSet", "\n")
 	
 	# Read Parameters
 	parameters <- read.csv(file.path(dir_output, "scprep_parameters.csv"), stringsAsFactors=FALSE, row.names=1)
@@ -36,11 +36,11 @@ template_scprep <- function(
 	#
 	names(param.list) <- rownames(parameters)
 	#
-	param.list["mem"] = list(as.numeric(param.list[["mem"]]))
-	param.list["min_umi"] = list(as.numeric(param.list[["min_umi"]]))
-	param.list["min_gene"] = list(as.numeric(param.list[["min_gene"]]))
-	param.list["max_mito"] = list(as.numeric(param.list[["max_mito"]]))
-	param.list["gene_filter"] = list(as.numeric(param.list[["gene_filter"]]))
+	param.list["mem"] <- list(as.numeric(param.list[["mem"]]))
+	param.list["min_umi"] <- list(as.numeric(param.list[["min_umi"]]))
+	param.list["min_gene"] <- list(as.numeric(param.list[["min_gene"]]))
+	param.list["max_mito"] <- list(as.numeric(param.list[["max_mito"]]))
+	param.list["gene_filter"] <- list(as.numeric(param.list[["gene_filter"]]))
 	#
 
 	# Parameters
