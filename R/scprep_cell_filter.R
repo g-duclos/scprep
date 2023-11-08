@@ -9,7 +9,7 @@
 #' @return Sample-specific Cell, Dead, & Debris assignment
 #' @export
 #' @examples
-#' cell_filter(dataset=ExpressionSet, sample=sample, min_umi=100, min_gene=0, max_mito=0.2)
+#' scprep_cell_filter(dataset=ExpressionSet, sample=sample, min_umi=100, min_gene=0, max_mito=0.2)
 #
 
 #

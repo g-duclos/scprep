@@ -43,6 +43,9 @@ Define the input directory (*dir_input*), which must contain a subdirectory name
 
 * **filtered_feature_matrix_bc.h5** (the filtered gene counts matrix for each sample)
 
+#### Dependency Note:
+The ["Seurat" R package](https://satijalab.org/seurat/) must be installed (v3 or v4 is acceptable, only the 'Read10X_h5' function is required) in order to use **scprep**. However, Seurat is NOT included as a formal package dependency due to common installation complications.
+
 ***
 
 ## Overview

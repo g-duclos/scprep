@@ -84,7 +84,7 @@ scprep_eset_build <- function(
 			#
 		}
 		# Check if number of unique samples equals sample number specified in annotation
-		n.samples = as.numeric(unique(mat.barcodes[seq(2,length(mat.barcodes),2)]))
+		n.samples <- as.numeric(unique(mat.barcodes[seq(2,length(mat.barcodes),2)]))
 		#
 		if (length(n.samples) == nrow(annotation)) {
 			#
@@ -157,7 +157,7 @@ scprep_eset_build <- function(
 						#
 					}
 					#
-					annot.all = sapply(1:ncol(annotation), function(x) {
+					annot.all <- sapply(1:ncol(annotation), function(x) {
 						return(rep(annotation[i, x], ncol(counts.all)))
 						})
 					colnames(annot.all) <- c("Sample", colnames(annotation)[2:ncol(annotation)])
@@ -218,7 +218,7 @@ scprep_eset_build <- function(
 						counts.all = cbind(counts.all, counts)
 						#
 						if (cite == TRUE) {
-							counts.cite.all = cbind(counts.cite.all, counts.cite)
+							counts.cite.all <- cbind(counts.cite.all, counts.cite)
 						}
 						#
 						annot.all <- rbind(annot.all, annot)
@@ -254,29 +254,26 @@ scprep_eset_build <- function(
 		}
 	}
 	#
-	# Make ExpressionSet
-	dataset <- new("ExpressionSet");
+	# Initiate ExpressionSet
+	dataset <- new("ExpressionSet")
+	#
 	pData(dataset) <- data.frame(
     	ID = colnames(counts.all),
 		stringsAsFactors = FALSE)
 	#
-	assayData.list = list()
+	assayData.list <- list()
 	#
 	assayData.list$exprs <- matrix(
-	data = 0L, nrow = nrow(counts.all), ncol = ncol(counts.all),
-    dimnames = list(rownames(counts.all), colnames(counts.all)))
-	
-	# Must replace true sample IDs
+		data = 0L, nrow = nrow(counts.all), ncol = ncol(counts.all),
+    	dimnames = list(rownames(counts.all), colnames(counts.all)))
+	#
     colnames(assayData.list$exprs) <- colnames(counts.all)
-   
-   	# Add the counts from the new sample
+   	#
     assayData.list$exprs <- counts.all
-	
-	# Provide IDs based on column names of counts files
+	#
 	dataset$ID <- colnames(assayData.list$exprs)
 	rownames(pData(dataset)) <- dataset$ID
-	
-	# Add the counts and RPM matrices to the ExpressionSet
+	#
 	assayData(dataset) <- as.environment(assayData.list)
 	
 	#	
@@ -285,7 +282,6 @@ scprep_eset_build <- function(
 		assayData(dataset)$Protein <- list()
 		assayData(dataset)$Protein["Counts"] <- list(Matrix::Matrix(counts.cite.all, sparse=TRUE))
 	}
-
 
 	#	
 	if (vdj == TRUE) {
@@ -299,7 +295,7 @@ scprep_eset_build <- function(
 		dataset[[colnames(annot.all)[i]]] <- as.factor(annot.all[,i])
 	}
 	
-	# Total counts per sample - exclude ERCC counts
+	# Total counts per sampl
 	cat("Calculate UMIs per cell", "\n")
 	dataset$UMIs <- colSums(counts.all)
 
@@ -307,7 +303,7 @@ scprep_eset_build <- function(
 	cat("Calculate Genes per cell", "\n")
 	dataset$Genes <- unlist(lapply(1:ncol(exprs(dataset)), function(x) {
 		return(length(rownames(exprs(dataset))[which(exprs(dataset)[,x] >= 1)]))
-		}))
+	}))
 
 	# Define additional assayData slots
 	assayData(dataset)$Params <- list()

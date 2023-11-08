@@ -11,9 +11,6 @@
 #
 template_scprep <- function(
 	dir_output=dir_output) {
-
-	# Load start up 'scprep' message
-	#scprep_load_startup_message(load=TRUE);
 	#
 	cat(paste(Sys.time()), "\n")
 	cat("Build ExpressionSet", "\n")
@@ -99,7 +96,7 @@ template_scprep <- function(
 		cat(paste("Expressed Genes:", length(genes), "/", nrow(exprs(dataset))), "\n")
 	}
 	#
-	expressed = c(rep("Expressed", length(genes)), rep("Not_Expressed", length(setdiff(rownames(exprs(dataset)), genes))))
+	expressed <- c(rep("Expressed", length(genes)), rep("Not_Expressed", length(setdiff(rownames(exprs(dataset)), genes))))
 	names(expressed) <- c(genes, setdiff(rownames(exprs(dataset)), genes))
 	#
 	fData(dataset)$Gene_Filter <- as.factor(expressed[rownames(exprs(dataset))])
@@ -108,10 +105,6 @@ template_scprep <- function(
 	cat("Save ExpressionSet", "\n")
 	saveRDS(dataset, file.path(dir_output, "ExpressionSet.rds"));
 	
-	# Calculate sample number from annotation
-	nsamples <- length(unique(dataset$Sample))
-	cat(paste("Sample number:", nsamples), "\n")
-
 	#
 	return(dataset)
 	#
