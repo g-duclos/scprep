@@ -1,0 +1,5 @@
+Sample_ID,Index,Sample_Project,Reference,Sample_Type,Label,Order,Colors,Tissue,Type,Donor
+Sample_1,SI-GA-A1,scRNA_10X_Project_ID,refdata-cellranger-GRCh38-3.0.0,Fresh,Sample 1,1,grey40,Blood,PBMC,1
+Sample_2,SI-GA-B1,scRNA_10X_Project_ID,refdata-cellranger-GRCh38-3.0.0,Fresh,Sample 2,2,grey70,Blood,PBMC,2
+Sample_3,SI-GA-C1,scRNA_10X_Project_ID,refdata-cellranger-GRCh38-3.0.0,Fresh,Sample 3,3,firebrick2,Lung,Tumor,1
+Sample_4,SI-GA-D1,scRNA_10X_Project_ID,refdata-cellranger-GRCh38-3.0.0,Fresh,Sample 4,4,dodgerblue2,Lung,Tumor,2
