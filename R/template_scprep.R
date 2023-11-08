@@ -23,8 +23,7 @@ template_scprep <- function(
 	
 	# Read annotation
 	annotation <- read.csv(file.path(dir_output, "scprep_annotation.csv"), stringsAsFactors=FALSE)
-	#rownames(annotation) <- annotation$Sample_ID
-	rownames(annotation) <- annotation$Analysis_ID
+	rownames(annotation) <- annotation$Sample_ID
 
 	# Pass parameters to variables & incorporate into ExpressionSet
 	param.list <- lapply(rownames(parameters), function(param) {
