@@ -19,7 +19,7 @@ scprep_eset_biomart <- function(
 	cat("BiomaRt Feature Annotation", "\n")
 
 	# Initialize featureData slot of ExpressionSet
-	fData(dataset) <- data.frame(row.names=rownames(exprs(dataset)))
+	fData(dataset) <- data.frame(row.names=rownames(dataset))
 
 	# Read stored feature annotation
 	if (reference == "refdata-cellranger-GRCh38-3.0.0" | reference == "GRCh38_pre-mRNA") {
@@ -35,6 +35,8 @@ scprep_eset_biomart <- function(
 		biomart_annotation <- biomart_annotation_ens_98
 		#
 	}
+	# Select only genes from annotation present in the dataset
+	biomart_annotation <- biomart_annotation[intersect(rownames(dataset), rownames(biomart_annotation)), ]
 	#
  	for (fdata in colnames(biomart_annotation)) {
  		fData(dataset)[[fdata]] <- biomart_annotation[intersect(rownames(biomart_annotation), rownames(exprs(dataset))), fdata]
@@ -52,7 +54,7 @@ scprep_eset_biomart <- function(
 		biotype.quant <- sapply(biotypes, function (biotype) {
 			cat(paste("Biotype:", biotype), "\n")
 			sapply(1:ncol(exprs(dataset)), function(cell) {
-				return(sum(exprs(dataset)[rownames(exprs(dataset))[which(fData(dataset)[[biotype.var]] == biotype)], cell]))
+				return(sum(exprs(dataset)[rownames(dataset)[which(fData(dataset)[[biotype.var]] == biotype)], cell]))
 			})
 		})
 		colnames(biotype.quant) <- biotypes
@@ -72,7 +74,7 @@ scprep_eset_biomart <- function(
 	chr.quant <- sapply(chroms, function (chr) {
 		cat(paste("Chromosome:", chr), "\n")
 		sapply(1:ncol(exprs(dataset)), function(cell) {
-			return(sum(exprs(dataset)[rownames(exprs(dataset))[which(fData(dataset)$Chr == chr)], cell]))
+			return(sum(exprs(dataset)[rownames(dataset)[which(fData(dataset)$Chr == chr)], cell]))
 		})
 	})
 	colnames(chr.quant) <- chroms

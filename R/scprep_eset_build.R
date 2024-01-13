@@ -96,14 +96,14 @@ scprep_eset_build <- function(
 				cat(n.barcodes[i], "Cells Detected in", annotation$Sample_ID[i], "\n")
 				return(sapply(1:ncol(annotation), function(x) {
 					return(rep(annotation[i, x], n.barcodes[i]))
-					}))
 				}))
+			}))
 			colnames(annot.all) <- c("Sample", colnames(annotation)[2:ncol(annotation)])
 			rownames(annot.all) <- colnames(counts.all)
 			#
 			} else {
 				cat("Matrix Sample Number Does NOT Match Sample Number Specified in Annotation!", "\n")
-				}
+			}
 		#			
 		} else {
 			#
@@ -159,7 +159,7 @@ scprep_eset_build <- function(
 					#
 					annot.all <- sapply(1:ncol(annotation), function(x) {
 						return(rep(annotation[i, x], ncol(counts.all)))
-						})
+					})
 					colnames(annot.all) <- c("Sample", colnames(annotation)[2:ncol(annotation)])
 					rownames(annot.all) <- colnames(counts.all)
 					#
@@ -209,13 +209,13 @@ scprep_eset_build <- function(
 							#
 						}
 						#
-						annot = sapply(1:ncol(annotation), function(x) {
+						annot <- sapply(1:ncol(annotation), function(x) {
 							return(rep(annotation[i, x], ncol(counts)))
-							})
+						})
 						colnames(annot) <- c("Sample", colnames(annotation)[2:ncol(annotation)])
 						rownames(annot) <- colnames(counts)
 						#
-						counts.all = cbind(counts.all, counts)
+						counts.all <- cbind(counts.all, counts)
 						#
 						if (cite == TRUE) {
 							counts.cite.all <- cbind(counts.cite.all, counts.cite)

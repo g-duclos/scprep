@@ -19,7 +19,7 @@ template_scprep <- function(
 	parameters <- read.csv(file.path(dir_output, "scprep_parameters.csv"), stringsAsFactors=FALSE, row.names=1)
 	
 	# Read annotation
-	annotation <- read.csv(file.path(dir_output, "scprep_annotation.csv"), stringsAsFactors=FALSE)
+	annotation <- suppressWarnings(read.csv(file.path(dir_output, "scprep_annotation.csv"), stringsAsFactors=FALSE))
 	rownames(annotation) <- annotation$Sample_ID
 
 	# Pass parameters to variables & incorporate into ExpressionSet
@@ -64,7 +64,7 @@ template_scprep <- function(
 	#
 	cat("Store Parameters & Random Seeds in ExpressionSet assayData Params", "\n")
 	assayData(dataset)$Params["Parameters"] <- list(param.list)
-	assayData(dataset)$Params["Seeds"] <- list(eset_seeds(n.seeds=1000))
+	assayData(dataset)$Params["Seeds"] <- list(scprep_eset_seeds(n.seeds=1000))
 	#
 	cat("Barcode Filter:", "\n")
 	cat("Cell: High Transcript Content & Low Mitochondrial Content", "\n")
