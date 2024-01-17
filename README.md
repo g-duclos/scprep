@@ -60,9 +60,8 @@ dataset <- scprep::template_scprep(dir_output=dir_output)
 Core functions include:
 
 <details>
-	<summary> Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet object. Add sample metadata from scprep_annotation.csv to the "pData" slot of the ExpressionSet object. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the "pData" slot of the ExpressionSet object. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the ExpressionSet object.</summary>
+	<summary>Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet object. Add sample metadata from scprep_annotation.csv to the "pData" slot of the ExpressionSet object. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the "pData" slot of the ExpressionSet object. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the ExpressionSet object.</summary>
 <pre>
-```	
 # Build ExpressionSet object with GEX counts and cell metadata
 dataset <- scprep::scprep_eset_build(
 	sample_paths=sample_paths,
@@ -70,22 +69,20 @@ dataset <- scprep::scprep_eset_build(
 	vdj=vdj,
 	cite=cite,
 	atac=atac)
-```
 </pre>
 </details>
 
-* Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype) using the [biomaRt R package](https://bioconductor.org/packages/release/bioc/html/biomaRt.html). Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.
-```
+<details>
+	<summary>Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype) using the [biomaRt R package](https://bioconductor.org/packages/release/bioc/html/biomaRt.html). Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.</summary>
+<pre>
 # Add gene-level metadata to the ExpressionSet object
 dataset <- scprep::scprep_eset_biomart(
 	dataset=dataset,
 	ensembl_target=ensembl_target,
 	reference=reference)
-```
+</pre>
+</details>
 
-* Store parameters specified in the scprep_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object
-
-* Generate random seeds utilized for this analysis and store in a list labeled "Seeds" in the "assayData" slot labeled "Params" in the ExpressionSet object
 
 * Assign barcodes the status of "Dead" if a high percentage of total transcripts are derived from mitochondrial genes ("max_mito" fraction specified in "scprep_parameters.csv"). Assign barcodes the status of "Debris" if low numbers of total transcripts or genes were detected per cell ("min_umi" and "min_gene" specified in "scprep_parameters.csv"). Assign barcodes the status of "Cell" if percent mitochondrial transcripts is less than "max_mito" and if total transcripts is greater than "min_umi".
 ```
@@ -96,6 +93,10 @@ dataset$Cell_Filter <- as.factor(scprep::scprep_cell_filter_multi(
 	min_gene=min_gene,
 	max_mito=max_mito))
 ```
+
+* Store parameters specified in the scprep_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object
+
+* Generate random seeds utilized for this analysis and store in a list labeled "Seeds" in the "assayData" slot labeled "Params" in the ExpressionSet object
 
 * Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object.
 
