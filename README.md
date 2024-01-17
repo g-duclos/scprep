@@ -72,6 +72,7 @@ dataset <- scprep::scprep_eset_build(
 </pre>
 </details>
 
+
 <details>
 	<summary>Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype) using the [biomaRt R package](https://bioconductor.org/packages/release/bioc/html/biomaRt.html). Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.</summary>
 <pre>
@@ -84,22 +85,28 @@ dataset <- scprep::scprep_eset_biomart(
 </details>
 
 
-* Assign barcodes the status of "Dead" if a high percentage of total transcripts are derived from mitochondrial genes ("max_mito" fraction specified in "scprep_parameters.csv"). Assign barcodes the status of "Debris" if low numbers of total transcripts or genes were detected per cell ("min_umi" and "min_gene" specified in "scprep_parameters.csv"). Assign barcodes the status of "Cell" if percent mitochondrial transcripts is less than "max_mito" and if total transcripts is greater than "min_umi".
-```
+<details>
+	<summary>Assign barcodes the status of "Dead" if a high percentage of total transcripts are derived from mitochondrial genes ("max_mito" fraction specified in "scprep_parameters.csv"). Assign barcodes the status of "Debris" if low numbers of total transcripts or genes were detected per cell ("min_umi" and "min_gene" specified in "scprep_parameters.csv"). Assign barcodes the status of "Cell" if percent mitochondrial transcripts is less than "max_mito" and if total transcripts is greater than "min_umi".</summary>
+<pre>
 # Assign status of high quality "Cell", "Dead", or "Debris" to each barcode
 dataset$Cell_Filter <- as.factor(scprep::scprep_cell_filter_multi(
 	dataset=dataset,
 	min_umi=min_umi,
 	min_gene=min_gene,
 	max_mito=max_mito))
-```
+</pre>
+</details>
 
-* Store parameters specified in the scprep_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object
 
-* Generate random seeds utilized for this analysis and store in a list labeled "Seeds" in the "assayData" slot labeled "Params" in the ExpressionSet object
+<details>
+	<summary>Additional features</summary>
+<ul><li>Store parameters specified in the scprep_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object</li>
 
-* Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object.
+<ul><li>Generate random seeds utilized for this analysis and store in a list labeled "Seeds" in the "assayData" slot labeled "Params" in the ExpressionSet object</li>
 
-* Save ExpressionSet RDS object in *dir_output*
+<ul><li>Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object</li>
+
+<ul><li>Save ExpressionSet RDS object in *dir_output*</li></ul>
+</details>
 
 ***
