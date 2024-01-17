@@ -70,9 +70,9 @@ dataset <- scprep::scprep_eset_build(
 	atac=atac)
 ```
 
-* Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype). Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.
+* Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype) using the [biomaRt R package](https://bioconductor.org/packages/release/bioc/html/biomaRt.html). Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.
 ```
-# Build ExpressionSet object with GEX counts and cell metadata
+# Add gene-level metadata to the ExpressionSet object
 dataset <- scprep::scprep_eset_biomart(
 		dataset=dataset,
 		ensembl_target=ensembl_target,
