@@ -74,9 +74,9 @@ dataset <- scprep::scprep_eset_build(
 ```
 # Add gene-level metadata to the ExpressionSet object
 dataset <- scprep::scprep_eset_biomart(
-		dataset=dataset,
-		ensembl_target=ensembl_target,
-		reference=reference)
+	dataset=dataset,
+	ensembl_target=ensembl_target,
+	reference=reference)
 ```
 
 * Store parameters specified in the scprep_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object
@@ -87,10 +87,10 @@ dataset <- scprep::scprep_eset_biomart(
 ```
 # Assign status of high quality "Cell", "Dead", or "Debris" to each barcode
 dataset$Cell_Filter <- as.factor(scprep::scprep_cell_filter_multi(
-		dataset=dataset,
-		min_umi=min_umi,
-		min_gene=min_gene,
-		max_mito=max_mito))
+	dataset=dataset,
+	min_umi=min_umi,
+	min_gene=min_gene,
+	max_mito=max_mito))
 ```
 
 * Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object.
