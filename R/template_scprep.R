@@ -1,11 +1,11 @@
-#' Template function for building ExpressionSet object
+#' Template function for building scRNA-Seq ExpressionSet object
 #'
 #' This function builds an ExpressionSet object with scRNA data
 #' @param dir_output Output directory for analysis results
 #' @return ExpressionSet object
 #' @export
 #' @examples
-#' template_scprep(dir_output="/new/directory")
+#' template_scprep(dir_output="/path/to/output")
 #
 
 #
@@ -13,8 +13,8 @@ template_scprep <- function(
 	dir_output=dir_output) {
 	#
 	cat(paste(Sys.time()), "\n")
-	cat("Build ExpressionSet", "\n")
-	
+	cat("Initiate Preparation of scRNA-Seq Data", "\n")
+
 	# Read Parameters
 	parameters <- read.csv(file.path(dir_output, "scprep_parameters.csv"), stringsAsFactors=FALSE, row.names=1)
 	
@@ -28,7 +28,7 @@ template_scprep <- function(
 		cat(paste(parameters[param, "Brief"], parameters[param, "Selection"]), "\n")
 		return(parameters[param, "Selection"])
 		#
-		})
+	})
 	#
 	names(param.list) <- rownames(parameters)
 	#
@@ -37,7 +37,11 @@ template_scprep <- function(
 	param.list["min_gene"] <- list(as.numeric(param.list[["min_gene"]]))
 	param.list["max_mito"] <- list(as.numeric(param.list[["max_mito"]]))
 	param.list["gene_filter"] <- list(as.numeric(param.list[["gene_filter"]]))
+
 	#
+	cat("Store Parameters & Random Seeds in ExpressionSet assayData Params", "\n")
+	Biobase::assayData(dataset)$Params["scprep_Parameters"] <- list(param.list)
+	Biobase::assayData(dataset)$Params["Seeds"] <- list(scprep::scprep_eset_seeds(n.seeds=1000))
 
 	# Parameters
 	cat("Initiate ESet Build", "\n")
@@ -48,7 +52,7 @@ template_scprep <- function(
 
 	# Initiate ExpressionSet
 	cat("Initiate ExpressionSet", "\n")
-	dataset <- scprep_eset_build(
+	dataset <- scprep::scprep_eset_build(
 		sample_paths=file.path(annotation$Sample_Path, annotation$Sample_ID),
 		annotation=annotation,
 		vdj=param.list[["vdj"]],
@@ -57,20 +61,17 @@ template_scprep <- function(
 
 	# Biomart
 	cat("BiomaRt Feature Annotation of ExpressionSet", "\n")
-	dataset <- scprep_eset_biomart(
+	dataset <- scprep::scprep_eset_biomart(
 		dataset=dataset,
 		ensembl_target=param.list[["ensembl"]],
 		reference=unique(annotation[,"Reference"]))
-	#
-	cat("Store Parameters & Random Seeds in ExpressionSet assayData Params", "\n")
-	assayData(dataset)$Params["Parameters"] <- list(param.list)
-	assayData(dataset)$Params["Seeds"] <- list(scprep_eset_seeds(n.seeds=1000))
+
 	#
 	cat("Barcode Filter:", "\n")
 	cat("Cell: High Transcript Content & Low Mitochondrial Content", "\n")
 	cat("Dead: High Mitochondrial Content", "\n")
 	cat("Debris: Low Transcript Content", "\n")
-	dataset$Cell_Filter <- as.factor(scprep_cell_filter_multi(
+	dataset$Cell_Filter <- as.factor(scprep::scprep_cell_filter_multi(
 		dataset=dataset,
 		min_umi=param.list[["min_umi"]],
 		min_gene=param.list[["min_gene"]],
@@ -87,19 +88,19 @@ template_scprep <- function(
 		#
 		cat(paste("Gene Filter = 'NA': >= 3 Transcripts Detected in Default of 0.1% of Cells", sep=""), "\n")
 		cat(paste("NOTE: ALL genes will be used as Seurat input", sep=""), "\n")
-		genes <- rownames(exprs(dataset)[,cells])[which(rowSums(exprs(dataset)[,cells] >= 3) >= ((0.1/100)*ncol(exprs(dataset)[,cells])))]
-		cat(paste("Expressed Genes:", length(genes), "/", nrow(exprs(dataset))), "\n")
+		genes <- rownames(Biobase::exprs(dataset)[,cells])[which(rowSums(Biobase::exprs(dataset)[,cells] >= 3) >= ((0.1/100)*ncol(Biobase::exprs(dataset)[,cells])))]
+		cat(paste("Expressed Genes:", length(genes), "/", nrow(Biobase::exprs(dataset))), "\n")
 	} else {
 		#
 		cat(paste("Gene Filter: >= 3 Transcripts Detected in ", param.list[["gene_filter"]], "% of Cells", sep=""), "\n")
-		genes <- rownames(exprs(dataset)[,cells])[which(rowSums(exprs(dataset)[,cells] >= 3) >= ((param.list[["gene_filter"]]/100)*ncol(exprs(dataset)[,cells])))]
-		cat(paste("Expressed Genes:", length(genes), "/", nrow(exprs(dataset))), "\n")
+		genes <- rownames(Biobase::exprs(dataset)[,cells])[which(rowSums(Biobase::exprs(dataset)[,cells] >= 3) >= ((param.list[["gene_filter"]]/100)*ncol(Biobase::exprs(dataset)[,cells])))]
+		cat(paste("Expressed Genes:", length(genes), "/", nrow(Biobase::exprs(dataset))), "\n")
 	}
 	#
-	expressed <- c(rep("Expressed", length(genes)), rep("Not_Expressed", length(setdiff(rownames(exprs(dataset)), genes))))
-	names(expressed) <- c(genes, setdiff(rownames(exprs(dataset)), genes))
+	expressed <- c(rep("Expressed", length(genes)), rep("Not_Expressed", length(setdiff(rownames(Biobase::exprs(dataset)), genes))))
+	names(expressed) <- c(genes, setdiff(rownames(Biobase::exprs(dataset)), genes))
 	#
-	fData(dataset)$Gene_Filter <- as.factor(expressed[rownames(exprs(dataset))])
+	Biobase::fData(dataset)$Gene_Filter <- as.factor(expressed[rownames(Biobase::exprs(dataset))])
 
 	# save ExpressionSet as RDS
 	cat("Save ExpressionSet", "\n")

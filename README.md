@@ -3,7 +3,7 @@
 ***
 
 # **scprep**
-An R package for aggregating single-cell RNA-Seq data and metadata in an ExpressionSet object, along with biomaRt gene annotation and basic cell filtering
+An R package for aggregating single-cell RNA-Seq data and metadata in an ExpressionSet object, along with biomaRt gene annotation, basic cell filtering and QC metric calculation.
 
 ***
 
@@ -39,18 +39,19 @@ Specify the pipeline parameters - view the parameters file here: [scprep_paramet
 * *dir_output* (path to output directory)
 
 #### Input Directory
-Define the input directory (*dir_input*), which must contain a subdirectory named after each sample. The input directory (*dir_input*) must also contain the following files produced by 10X Genomics' *Cell Ranger* pipeline:
+Define the input directory (*dir_input*), which must contain a subdirectory named after each sample. The input directory (*dir_input*) must also contain the following file(s) produced by 10X Genomics' *Cell Ranger* pipeline:
 
 * **filtered_feature_matrix_bc.h5** (the filtered gene counts matrix for each sample)
+* If working with 10x Genomics Immune Profiling assay that includes 5' RNA-Seq with TCR or Ig V(D)J data: **filtered_contig_annotations.csv**
 
 #### Dependency Note:
-The ["Seurat" R package](https://satijalab.org/seurat/) must be installed (v3 or v4 is acceptable, only the 'Read10X_h5' function is required) in order to use **scprep**. However, Seurat is NOT included as a formal package dependency due to common installation complications.
+The ["Seurat" R package](https://satijalab.org/seurat/) must be installed (v3, v4, or v5 is acceptable, only the 'Read10X_h5' function is required) in order to use **scprep**. However, Seurat is NOT included as a formal package dependency due to common installation complications.
 
 ***
 
 ## Overview
 
-Template function to aggregate gene counts matrices from multiple samples, store aggregated counts matrices and metadata (for samples and genes) in an "ExpressionSet" S4 object, perform cell filtering, and calculate select QC metrics.
+Template function to aggregate gene counts matrices from multiple samples, store aggregated counts matrices and metadata (for samples and genes) in an "ExpressionSet" S4 object, add biomaRt gene annotation, perform cell filtering, and calculate select QC metrics.
 ```
 library(Biobase)
 dataset <- scprep::template_scprep(dir_output=dir_output)
@@ -58,18 +59,42 @@ dataset <- scprep::template_scprep(dir_output=dir_output)
 
 Core functions include:
 
-* Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet object. Add sample metadata from scprep_annotation.csv to the "pData" slot of the ExpressionSet object. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the "pData" slot of the ExpressionSet object.
+* Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet object. Add sample metadata from scprep_annotation.csv to the "pData" slot of the ExpressionSet object. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the "pData" slot of the ExpressionSet object. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the ExpressionSet object.
+```
+# Build ExpressionSet object with GEX counts and cell metadata
+dataset <- scprep::scprep_eset_build(
+	sample_paths=sample_paths,
+	annotation=annotation,
+	vdj=vdj,
+	cite=cite,
+	atac=atac)
+```
 
 * Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype). Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.
+```
+# Build ExpressionSet object with GEX counts and cell metadata
+dataset <- scprep::scprep_eset_biomart(
+		dataset=dataset,
+		ensembl_target=ensembl_target,
+		reference=reference)
+```
 
 * Store parameters specified in the scprep_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object
 
 * Generate random seeds utilized for this analysis and store in a list labeled "Seeds" in the "assayData" slot labeled "Params" in the ExpressionSet object
 
-* Assign barcodes the status of "Dead" if a high percentage of total transcripts are derived from mitochondrial genes ("max_mito" fraction specified in parameters.csv). Assign barcodes the status of "Debris" if low numbers of total transcripts or genes were detected per cell ("min_umi" and "min_gene" specified in parameters.csv). Assign barcodes the status of "Cell" if percent mitochondrial transcripts is less than "max_mito" and if total transcripts is greater than "min_umi".
+* Assign barcodes the status of "Dead" if a high percentage of total transcripts are derived from mitochondrial genes ("max_mito" fraction specified in "scprep_parameters.csv"). Assign barcodes the status of "Debris" if low numbers of total transcripts or genes were detected per cell ("min_umi" and "min_gene" specified in "scprep_parameters.csv"). Assign barcodes the status of "Cell" if percent mitochondrial transcripts is less than "max_mito" and if total transcripts is greater than "min_umi".
+```
+# Assign status of high quality "Cell", "Dead", or "Debris" to each barcode
+dataset$Cell_Filter <- as.factor(scprep::scprep_cell_filter_multi(
+		dataset=dataset,
+		min_umi=min_umi,
+		min_gene=min_gene,
+		max_mito=max_mito))
+```
 
 * Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object.
 
-* Save ExpressionSet object in *dir_output*
+* Save ExpressionSet RDS object in *dir_output*
 
 ***

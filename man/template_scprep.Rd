@@ -2,7 +2,7 @@
 % Please edit documentation in R/template_scprep.R
 \name{template_scprep}
 \alias{template_scprep}
-\title{Template function for building ExpressionSet object}
+\title{Template function for building scRNA-Seq ExpressionSet object}
 \usage{
 template_scprep(dir_output = dir_output)
 }
@@ -16,5 +16,5 @@ ExpressionSet object
 This function builds an ExpressionSet object with scRNA data
 }
 \examples{
-template_scprep(dir_output="/new/directory")
+template_scprep(dir_output="/path/to/output")
 }

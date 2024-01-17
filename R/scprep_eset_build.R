@@ -295,7 +295,7 @@ scprep_eset_build <- function(
 		dataset[[colnames(annot.all)[i]]] <- as.factor(annot.all[,i])
 	}
 	
-	# Total counts per sampl
+	# Total counts per sample
 	cat("Calculate UMIs per cell", "\n")
 	dataset$UMIs <- colSums(counts.all)
 
