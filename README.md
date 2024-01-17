@@ -102,11 +102,12 @@ dataset$Cell_Filter <- as.factor(scprep::scprep_cell_filter_multi(
 	<summary>Additional features</summary>
 <ul><li>Store parameters specified in the scprep_parameters.csv file in a list labeled "Parameters" in the "assayData" slot labeled "Params" in the ExpressionSet object</li>
 
-<ul><li>Generate random seeds utilized for this analysis and store in a list labeled "Seeds" in the "assayData" slot labeled "Params" in the ExpressionSet object</li>
+<li>Generate random seeds utilized for this analysis and store in a list labeled "Seeds" in the "assayData" slot labeled "Params" in the ExpressionSet object</li>
 
-<ul><li>Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object</li>
+<li>Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object</li>
 
-<ul><li>Save ExpressionSet RDS object in *dir_output*</li></ul>
+<li>Save ExpressionSet RDS object in *dir_output*</li>
+</ul>
 </details>
 
 ***
