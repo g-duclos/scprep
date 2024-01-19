@@ -57,7 +57,7 @@ library(Biobase)
 dataset <- scprep::template_scprep(dir_output=dir_output)
 ```
 
-Core functions:
+**Core functions:**
 
 <details>
 	<summary>Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet object. Add sample metadata from scprep_annotation.csv to the "pData" slot of the ExpressionSet object. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the "pData" slot of the ExpressionSet object. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the ExpressionSet object.</summary>
@@ -74,7 +74,7 @@ dataset <- scprep::scprep_eset_build(
 
 
 <details>
-	<summary>Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype) using the [biomaRt R package](https://bioconductor.org/packages/release/bioc/html/biomaRt.html). Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.</summary>
+	<summary>Add gene-level metadata to the "fData" slot of the ExpressionSet object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype) using the <a href="https://bioconductor.org/packages/release/bioc/html/biomaRt.html">biomaRt R package</a>. Calculate transcripts per cell derived from each biotype and chromosome and add to the "pData" slot of the ExpressionSet object.</summary>
 <pre>
 # Add gene-level metadata to the ExpressionSet object
 dataset <- scprep::scprep_eset_biomart(
