@@ -13,3 +13,5 @@ RoxygenNote: 7.2.0
 Imports: 
     Biobase,
     devtools
+Depends: 
+    R (>= 4.0.0)
