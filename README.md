@@ -49,6 +49,7 @@ The ["Seurat" R package](https://satijalab.org/seurat/) must be installed (v3, v
 Template function to aggregate gene counts matrices from multiple samples, store aggregated counts matrices and metadata (for samples and genes) in an "ExpressionSet" S4 object, add biomaRt gene annotation, perform cell filtering, and calculate select QC metrics.
 ```
 library(Biobase)
+
 dataset <- scprep::template_scprep(dir_output=dir_output)
 ```
 
