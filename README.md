@@ -54,7 +54,7 @@ dataset <- scprep::template_scprep(dir_output=dir_output)
 
 **Core functions:**
 
-#### Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet object. Add sample metadata from scprep_annotation.csv to the "pData" slot of the ExpressionSet object. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the "pData" slot of the ExpressionSet object. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the ExpressionSet object.</summary>
+* Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet object. Add sample metadata from scprep_annotation.csv to the "pData" slot of the ExpressionSet object. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the "pData" slot of the ExpressionSet object. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the ExpressionSet object.</summary>
 
 ```
 # Build ExpressionSet object with GEX counts and cell metadata
