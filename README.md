@@ -9,14 +9,9 @@ An R package for aggregating single-cell RNA-Seq data and metadata in an Express
 
 ## Installation
 
-Clone the 'scprep' repository
+The **scprep** R package can be installed from Github using devtools:
 ```
-git clone https://github.com/g-duclos/scprep.git
-```
-
-Run R and install the package
-```
-install.packages("scprep", repos=NULL, type="source")
+devtools::install_github("g-duclos/scprep")
 ```
 
 ***
