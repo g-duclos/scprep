@@ -102,7 +102,7 @@ dataset$Cell_Filter <- as.factor(scprep::scprep_cell_filter_multi(
 
 <li>Select genes with at least 3 transcript counts in a pre-specified (see "gene_filter" in scprep_parameters.csv) percentage (default = 0.1%) of cells and label as "Expressed" in "fData" slot of ExpressionSet object. All other genes are labeled as "Not_Expressed" in "fData" slot of ExpressionSet object</li>
 
-<li>Save ExpressionSet RDS object in *dir_output*</li>
+<li>Save ExpressionSet RDS file in *dir_output*</li>
 </ul>
 </details>
 
