@@ -1,4 +1,4 @@
-![Logo](inst/extdata/scprep_Logo_v2.pdf)
+![Logo](inst/extdata/scprep_Logo_v2.png)
 
 ***
 
