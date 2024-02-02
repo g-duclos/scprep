@@ -38,11 +38,6 @@ template_scprep <- function(
 	param.list["max_mito"] <- list(as.numeric(param.list[["max_mito"]]))
 	param.list["gene_filter"] <- list(as.numeric(param.list[["gene_filter"]]))
 
-	#
-	cat("Store Parameters & Random Seeds in ExpressionSet assayData Params", "\n")
-	Biobase::assayData(dataset)$Params["scprep_Parameters"] <- list(param.list)
-	Biobase::assayData(dataset)$Params["Seeds"] <- list(scprep::scprep_eset_seeds(n.seeds=1000))
-
 	# Parameters
 	cat("Initiate ESet Build", "\n")
 	#
@@ -53,11 +48,17 @@ template_scprep <- function(
 	# Initiate ExpressionSet
 	cat("Initiate ExpressionSet", "\n")
 	dataset <- scprep::scprep_eset_build(
-		sample_paths=file.path(annotation$Sample_Path, annotation$Sample_ID),
+		sample_paths=file.path(param.list[["dir_input"]], annotation$Sample_ID),
 		annotation=annotation,
+		file_type=param.list[["file_type"]],
 		vdj=param.list[["vdj"]],
 		cite=param.list[["cite"]],
 		atac=param.list[["atac"]])
+
+	#
+	cat("Store Parameters & Random Seeds in ExpressionSet assayData Params", "\n")
+	Biobase::assayData(dataset)$Params["scprep_Parameters"] <- list(param.list)
+	Biobase::assayData(dataset)$Params["Seeds"] <- list(scprep::scprep_eset_seeds(n.seeds=1000))
 
 	# Biomart
 	cat("BiomaRt Feature Annotation of ExpressionSet", "\n")

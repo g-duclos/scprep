@@ -7,6 +7,7 @@
 scprep_eset_build(
   sample_paths = sample_paths,
   annotation = annotation,
+  file_type = "h5",
   vdj = vdj,
   cite = cite,
   atac = atac
@@ -30,5 +31,5 @@ ExpressionSet object containing expression data for all samples & annotation in 
 This function builds an ExpressionSet object with scRNA data
 }
 \examples{
-scprep_eset_build(sample_paths=sample_paths, annotation=annotation, cite=cite)
+scprep_eset_build(sample_paths=sample_paths, annotation=annotation, file_type="h5", vdj=vdj, cite=cite, atac=atac)
 }

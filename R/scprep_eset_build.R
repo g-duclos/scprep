@@ -9,11 +9,12 @@
 #' @return ExpressionSet object containing expression data for all samples & annotation in pData slot & UMIs/Genes per cell
 #' @export
 #' @examples
-#' scprep_eset_build(sample_paths=sample_paths, annotation=annotation, cite=cite)
+#' scprep_eset_build(sample_paths=sample_paths, annotation=annotation, file_type="h5", vdj=vdj, cite=cite, atac=atac)
 #
 scprep_eset_build <- function(
 	sample_paths=sample_paths,
 	annotation=annotation,
+	file_type="h5",
 	vdj=vdj,
 	cite=cite,
 	atac=atac) {
@@ -36,11 +37,29 @@ scprep_eset_build <- function(
 	#
 	if (length(sample_paths) == 1) {
 		#
-		dir_counts <- file.path(sample_paths, counts.file.name)
+		if (file_type == "mtx") {
+			# If file type is mtx (vs h5), set dir_counts to file dir without filename
+			dir_counts <- sample_paths
+			# Set vdj/cite/atac to FALSE
+			vdj <- FALSE
+			atac <- FALSE
+			cite <- FALSE
+		} else {
+			# Default file_type is "h5", which requires dir_counts to include dir + filename
+			dir_counts <- file.path(sample_paths, counts.file.name)
+		}
 		#
 		if (cite == FALSE & atac == FALSE) {
 			#
-			counts.all <- suppressMessages(Seurat::Read10X_h5(dir_counts, use.names=FALSE))
+			if (file_type == "mtx") {
+				#
+				counts.all <- suppressMessages(Seurat::Read10X(dir_counts, gene.column=1))
+				#
+			} else {
+				#
+				counts.all <- suppressMessages(Seurat::Read10X_h5(dir_counts, use.names=FALSE))
+				#
+			}
 			#
 			if (typeof(counts.all) == "S4") {
 				#
@@ -109,13 +128,31 @@ scprep_eset_build <- function(
 			#
 			for (i in 1:length(sample_paths)) {
 				#
-				dir_counts <- file.path(sample_paths[i], counts.file.name)
+				if (file_type == "mtx") {
+					# If file type is mtx (vs h5), set dir_counts to file dir without filename
+					dir_counts <- sample_paths[i]
+					# Set vdj/cite/atac to FALSE
+					vdj <- FALSE
+					atac <- FALSE
+					cite <- FALSE
+				} else {
+					# Default file_type is "h5", which requires dir_counts to include dir + filename
+					dir_counts <- file.path(sample_paths[i], counts.file.name)
+				}
 				#
 				if (i == 1) {
 					#
-					if (cite == FALSE & atac == FALSE) {
+					if (cite == FALSE & atac == FALSE) {		
 						#
-						counts.all <- suppressMessages(Seurat::Read10X_h5(dir_counts, use.names=FALSE))
+						if (file_type == "mtx") {
+							#
+							counts.all <- suppressMessages(Seurat::Read10X(dir_counts, gene.column=1))
+							#
+						} else {
+							#
+							counts.all <- suppressMessages(Seurat::Read10X_h5(dir_counts, use.names=FALSE))
+							#
+						}
 						#
 						if (typeof(counts.all) == "S4") {
 							#
@@ -167,7 +204,15 @@ scprep_eset_build <- function(
 						#
 						if (cite == FALSE & atac == FALSE) {
 							#
-							counts <- suppressMessages(Seurat::Read10X_h5(dir_counts, use.names=FALSE))
+							if (file_type == "mtx") {
+								#
+								counts <- suppressMessages(Seurat::Read10X(dir_counts, gene.column=1))
+								#
+							} else {
+								#
+								counts <- suppressMessages(Seurat::Read10X_h5(dir_counts, use.names=FALSE))
+								#
+							}
 							#
 							if (typeof(counts) == "S4") {
 								#
@@ -253,11 +298,11 @@ scprep_eset_build <- function(
 			}
 		}
 	}
+	
 	#
-	# Initiate ExpressionSet
 	dataset <- new("ExpressionSet")
 	#
-	pData(dataset) <- data.frame(
+	Biobase::pData(dataset) <- data.frame(
     	ID = colnames(counts.all),
 		stringsAsFactors = FALSE)
 	#
@@ -272,9 +317,9 @@ scprep_eset_build <- function(
     assayData.list$exprs <- counts.all
 	#
 	dataset$ID <- colnames(assayData.list$exprs)
-	rownames(pData(dataset)) <- dataset$ID
+	rownames(Biobase::pData(dataset)) <- dataset$ID
 	#
-	assayData(dataset) <- as.environment(assayData.list)
+	Biobase::assayData(dataset) <- as.environment(assayData.list)
 	
 	#	
 	if (cite == TRUE) {
