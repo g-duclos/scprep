@@ -1,0 +1,21 @@
+# Git files
+.git
+.gitignore
+
+# R package build artifacts
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Documentation build files
+docs/
+*.tar.gz
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+*.Rproj

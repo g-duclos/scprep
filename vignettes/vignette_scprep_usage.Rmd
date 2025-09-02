@@ -1,0 +1,396 @@
+---
+title: "scprep: Single-cell Data Object Types Guide"
+author: "scprep package"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{scprep Object Types Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+
+# Introduction
+
+The `scprep` package provides a unified interface for reading and processing single-cell RNA-seq data from 10X Genomics Cell Ranger output. The package supports conversion to three popular single-cell data object types:
+
+- **ExpressionSet** (Biobase) - Default output format
+- **Seurat** - Popular for single-cell analysis workflows  
+- **SingleCellExperiment** - Bioconductor standard for single-cell data
+
+This vignette demonstrates how to read 10X data and convert it to each object type, then explore the structure of each object to understand where counts data, cell metadata, and gene metadata are stored.
+
+# Installation and Setup
+
+First, let's load the required packages:
+
+```{r libraries}
+library(scprep)
+library(Biobase)
+library(Seurat)
+library(SingleCellExperiment)
+library(Matrix)
+```
+
+# Example Data Setup
+
+For this example, we'll use simulated sample paths and annotation data that match the expected format for `scprep`. In practice, these would point to your actual 10X Cell Ranger output directories.
+
+```{r example_data}
+# Example sample paths (replace with your actual Cell Ranger output directories)
+sample_paths <- c(
+  "/path/to/Sample_1",
+  "/path/to/Sample_2"
+)
+
+# Example annotation data (modify based on your experimental design)
+annotation <- data.frame(
+  Sample_ID = c("Sample_1", "Sample_2"),
+  Index = c("SI-GA-A1", "SI-GA-B1"), 
+  Sample_Project = c("scRNA_10X_Project", "scRNA_10X_Project"),
+  Reference = c("refdata-cellranger-GRCh38-3.0.0", "refdata-cellranger-GRCh38-3.0.0"),
+  Tissue = c("Blood", "Blood"),
+  Type = c("PBMC", "PBMC"),
+  Donor = c(1, 2),
+  stringsAsFactors = FALSE
+)
+
+print("Sample annotation:")
+print(annotation)
+```
+
+# Reading Data and Object Conversion
+
+The `scprep` package provides two main approaches for reading and processing 10X data:
+
+1. **Direct function calls** using `scprep_eset_build()` 
+2. **Template workflow** using `template_scprep()` with parameter files
+
+## Direct Function Approach
+
+The `scprep_eset_build()` function is the core entry point for reading 10X data and can output different object types using the `output_type` parameter.
+
+## 1. ExpressionSet (Default)
+
+ExpressionSet is the default output format and is based on the Biobase package:
+
+```{r expressionset, eval=FALSE}
+# Read data and create ExpressionSet object (default)
+eset <- scprep_eset_build(
+  sample_paths = sample_paths,
+  annotation = annotation,
+  file_type = "h5",
+  vdj = FALSE,
+  cite = FALSE, 
+  atac = FALSE,
+  output_type = "ExpressionSet"  # This is the default
+)
+
+# Alternative - omit output_type parameter for default behavior
+eset <- scprep_eset_build(
+  sample_paths = sample_paths,
+  annotation = annotation,
+  file_type = "h5",
+  vdj = FALSE,
+  cite = FALSE,
+  atac = FALSE
+)
+```
+
+## 2. Seurat Object
+
+Convert directly to a Seurat object:
+
+```{r seurat, eval=FALSE}
+# Read data and create Seurat object
+seurat_obj <- scprep_eset_build(
+  sample_paths = sample_paths,
+  annotation = annotation,
+  file_type = "h5", 
+  vdj = FALSE,
+  cite = FALSE,
+  atac = FALSE,
+  output_type = "Seurat"
+)
+```
+
+## 3. SingleCellExperiment Object
+
+Convert directly to a SingleCellExperiment object:
+
+```{r sce, eval=FALSE}
+# Read data and create SingleCellExperiment object
+sce_obj <- scprep_eset_build(
+  sample_paths = sample_paths,
+  annotation = annotation,
+  file_type = "h5",
+  vdj = FALSE, 
+  cite = FALSE,
+  atac = FALSE,
+  output_type = "SingleCellExperiment"
+)
+```
+
+## Template Workflow Approach
+
+For automated processing with parameter files, use the `template_scprep()` function:
+
+```{r template_approach, eval=FALSE}
+# Create parameter file (scprep_parameters.csv) with output_type specification
+# Parameters file should include:
+# - dir_input: path to input directory
+# - dir_output: path to output directory  
+# - output_type: "ExpressionSet", "Seurat", or "SingleCellExperiment"
+# - file_type: "h5" or "mtx"
+# - Other processing parameters...
+
+# Run template workflow
+dataset <- scprep::template_scprep(dir_output = "/path/to/output")
+
+# Note: Advanced processing (biomaRt annotation, cell filtering) only available 
+# for ExpressionSet objects. For Seurat/SingleCellExperiment objects, the template
+# function will create the basic object and suggest using post-processing functions.
+```
+
+**Template workflow benefits:**
+- Parameter file-driven approach for reproducible analyses
+- Automatic parameter logging and seed generation
+- Built-in biomaRt gene annotation (ExpressionSet only)
+- Cell quality filtering (ExpressionSet only)
+- Gene expression filtering (ExpressionSet only)
+
+# Object Structure Exploration
+
+## ExpressionSet
+
+Now let's explore the structure of the ExpressionSet object to understand where different types of data are stored.
+
+```{r eset_structure, eval=FALSE}
+# Basic object information
+cat("ExpressionSet dimensions:", dim(eset), "\n")
+cat("Number of samples:", ncol(eset), "\n") 
+cat("Number of genes:", nrow(eset), "\n")
+
+# Expression data (counts matrix)
+counts_matrix <- exprs(eset)
+cat("Counts matrix class:", class(counts_matrix), "\n")
+cat("Counts matrix dimensions:", dim(counts_matrix), "\n")
+print("First few genes and cells:")
+print(counts_matrix[1:5, 1:3])
+
+# Cell-level metadata (sample information)  
+cell_metadata <- pData(eset)
+cat("Cell metadata dimensions:", dim(cell_metadata), "\n")
+print("Cell metadata columns:")
+print(colnames(cell_metadata))
+print("First few rows of cell metadata:")
+print(head(cell_metadata, 3))
+
+# Gene-level metadata
+gene_metadata <- fData(eset)
+cat("Gene metadata dimensions:", dim(gene_metadata), "\n") 
+if (ncol(gene_metadata) > 0) {
+  print("Gene metadata columns:")
+  print(colnames(gene_metadata))
+  print("First few rows of gene metadata:")
+  print(head(gene_metadata, 3))
+}
+
+# Additional assay data slots
+print("Available assay data slots:")
+print(names(assayData(eset)))
+
+# Quality control metrics (automatically calculated)
+print("Automatically calculated QC metrics:")
+print(paste("UMIs per cell: min =", min(eset$UMIs), "max =", max(eset$UMIs)))
+print(paste("Genes per cell: min =", min(eset$Genes), "max =", max(eset$Genes)))
+```
+
+## Seurat
+
+Now let's explore the structure of the Seurat object to understand where different types of data are stored.
+
+```{r seurat_structure, eval=FALSE}
+# Basic object information
+cat("Seurat object dimensions:", dim(seurat_obj), "\n")
+cat("Number of cells:", ncol(seurat_obj), "\n")
+cat("Number of genes:", nrow(seurat_obj), "\n")
+
+# Expression data (counts matrix)
+counts_matrix <- GetAssayData(seurat_obj, slot = "counts")
+cat("Counts matrix class:", class(counts_matrix), "\n")
+cat("Counts matrix dimensions:", dim(counts_matrix), "\n")
+print("First few genes and cells:")
+print(counts_matrix[1:5, 1:3])
+
+# Cell-level metadata
+cell_metadata <- seurat_obj@meta.data
+cat("Cell metadata dimensions:", dim(cell_metadata), "\n")
+print("Cell metadata columns:")
+print(colnames(cell_metadata))
+print("First few rows of cell metadata:")
+print(head(cell_metadata, 3))
+
+# Gene-level metadata  
+gene_metadata <- seurat_obj[["RNA"]]@meta.features
+cat("Gene metadata dimensions:", dim(gene_metadata), "\n")
+if (ncol(gene_metadata) > 0) {
+  print("Gene metadata columns:")
+  print(colnames(gene_metadata)) 
+  print("First few rows of gene metadata:")
+  print(head(gene_metadata, 3))
+}
+
+# Available assays
+print("Available assays:")
+print(names(seurat_obj@assays))
+
+# Quality control metrics
+if ("nCount_RNA" %in% colnames(cell_metadata)) {
+  print("Seurat QC metrics:")
+  print(paste("UMIs per cell: min =", min(cell_metadata$nCount_RNA), "max =", max(cell_metadata$nCount_RNA)))
+}
+if ("nFeature_RNA" %in% colnames(cell_metadata)) {
+  print(paste("Genes per cell: min =", min(cell_metadata$nFeature_RNA), "max =", max(cell_metadata$nFeature_RNA)))
+}
+```
+
+## SingleCellExperiment
+
+Now let's explore the structure of the SingleCellExperiment object to understand where different types of data are stored.
+
+```{r sce_structure, eval=FALSE}
+# Basic object information  
+cat("SingleCellExperiment dimensions:", dim(sce_obj), "\n")
+cat("Number of cells:", ncol(sce_obj), "\n")
+cat("Number of genes:", nrow(sce_obj), "\n")
+
+# Expression data (counts matrix)
+counts_matrix <- counts(sce_obj)
+cat("Counts matrix class:", class(counts_matrix), "\n") 
+cat("Counts matrix dimensions:", dim(counts_matrix), "\n")
+print("First few genes and cells:")
+print(counts_matrix[1:5, 1:3])
+
+# Cell-level metadata
+cell_metadata <- colData(sce_obj)
+cat("Cell metadata dimensions:", dim(cell_metadata), "\n")
+print("Cell metadata columns:")
+print(colnames(cell_metadata))
+print("First few rows of cell metadata:")
+print(head(cell_metadata, 3))
+
+# Gene-level metadata
+gene_metadata <- rowData(sce_obj) 
+cat("Gene metadata dimensions:", dim(gene_metadata), "\n")
+if (ncol(gene_metadata) > 0) {
+  print("Gene metadata columns:")
+  print(colnames(gene_metadata))
+  print("First few rows of gene metadata:")
+  print(head(gene_metadata, 3))
+}
+
+# Available assays
+print("Available assays:")
+print(assayNames(sce_obj))
+
+# Alternative experiments (if any)
+if (length(altExpNames(sce_obj)) > 0) {
+  print("Alternative experiments:")
+  print(altExpNames(sce_obj))
+}
+
+# Quality control metrics (from scprep)
+if ("UMIs" %in% colnames(cell_metadata)) {
+  print("Quality control metrics:")
+  print(paste("UMIs per cell: min =", min(cell_metadata$UMIs), "max =", max(cell_metadata$UMIs)))
+}
+if ("Genes" %in% colnames(cell_metadata)) {
+  print(paste("Genes per cell: min =", min(cell_metadata$Genes), "max =", max(cell_metadata$Genes)))
+}
+```
+
+# Summary: Data Location by Object Type {-}
+
+| Data Type | ExpressionSet | Seurat | SingleCellExperiment |
+|-----------|---------------|---------|---------------------|
+| **Counts Matrix** | `exprs(obj)` | `GetAssayData(obj, slot="counts")` | `counts(obj)` |
+| **Cell Metadata** | `pData(obj)` | `obj@meta.data` | `colData(obj)` |
+| **Gene Metadata** | `fData(obj)` | `obj[["RNA"]]@meta.features` | `rowData(obj)` |
+| **Additional Assays** | `assayData(obj)$SlotName` | `obj[["AssayName"]]` | `assay(obj, "AssayName")` |
+
+# Advanced Features
+
+## Multimodal Data
+
+The `scprep` package also supports multimodal data including CITE-seq (protein), V(D)J, and ATAC-seq data:
+
+```{r multimodal, eval=FALSE}
+# Example with CITE-seq data
+cite_obj <- scprep_eset_build(
+  sample_paths = sample_paths,
+  annotation = annotation, 
+  file_type = "h5",
+  vdj = FALSE,
+  cite = TRUE,  # Enable CITE-seq protein data
+  atac = FALSE,
+  output_type = "Seurat"
+)
+
+# Protein data will be stored as additional assay
+print("Available assays with CITE-seq:")
+print(names(cite_obj@assays))
+
+# Access protein counts
+if ("Protein" %in% names(cite_obj@assays)) {
+  protein_counts <- GetAssayData(cite_obj, assay = "Protein", slot = "counts")
+  print("Protein data dimensions:")
+  print(dim(protein_counts))
+}
+```
+
+## File Types
+
+The package supports both HDF5 (`.h5`) and MTX (`.mtx`) file formats:
+
+```{r file_types, eval=FALSE}
+# For HDF5 files (default)
+obj_h5 <- scprep_eset_build(
+  sample_paths = sample_paths,
+  annotation = annotation,
+  file_type = "h5"  # Default
+)
+
+# For MTX files  
+obj_mtx <- scprep_eset_build(
+  sample_paths = sample_paths,
+  annotation = annotation,
+  file_type = "mtx"
+)
+```
+
+# Conclusion {-}
+
+The `scprep` package provides a unified interface for reading 10X Genomics single-cell data and converting it to the most popular single-cell object formats. Each object type has its own conventions for storing expression data, metadata, and additional assays:
+
+- **ExpressionSet**: Traditional Bioconductor format with `exprs()`, `pData()`, and `fData()`
+- **Seurat**: Popular format with `GetAssayData()`, `@meta.data`, and assay-specific slots
+- **SingleCellExperiment**: Modern Bioconductor standard with `counts()`, `colData()`, and `rowData()`
+
+Choose the object type that best fits your downstream analysis workflow. All three formats preserve the same underlying data but organize it according to their respective conventions.
+

@@ -1,0 +1,2 @@
+# Exclude test file from version control
+test_new_functionality.R

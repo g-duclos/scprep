@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  scprep:
+    build: .
+    image: scprep:latest
+    container_name: scprep-container
+    volumes:
+      - ./data:/scprep/data
+      - ./output:/scprep/output
+    environment:
+      - DISABLE_AUTH=true
+    ports:
+      - "8787:8787"
+    command: R
+    
+  scprep-rstudio:
+    build: .
+    image: scprep:latest
+    container_name: scprep-rstudio
+    volumes:
+      - ./data:/scprep/data
+      - ./output:/scprep/output
+    environment:
+      - DISABLE_AUTH=true
+    ports:
+      - "8788:8787"
+    command: ["R", "-e", "rstudioapi::startRStudio()"]
