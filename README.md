@@ -3,7 +3,11 @@
 ***
 
 # **scprep**
-An R package for aggregating single-cell RNA-Seq data and metadata in an ExpressionSet object, along with biomaRt gene annotation, basic cell filtering and QC metric calculation.
+An R package for aggregating single-cell RNA-Seq data and metadata in ExpressionSet, Seurat, or SingleCellExperiment objects, along with biomaRt gene annotation, basic cell filtering and QC metric calculation.
+
+Data that may be used for testing **scprep** may be accessed via the **[scdata](https://github.com/g-duclos/scdata)** package.
+
+For post-processing & secondary analysis of data that has been ingested by **scprep**, this package may be coupled with **[scpost](https://github.com/g-duclos/scpost)**.
 
 ***
 
@@ -88,15 +92,53 @@ Define the input directory (*dir_input*), which must contain a subdirectory name
 **Additional Files:**
 * If working with 10x Genomics Immune Profiling assay that includes 5' RNA-Seq with TCR or Ig V(D)J data: **filtered_contig_annotations.csv**
 
-#### Dependency Note:
-The ["Seurat" R package](https://satijalab.org/seurat/) must be installed (v3, v4, or v5 is acceptable, only the 'Read10X_h5' function is required) in order to use **scprep**. However, Seurat is NOT included as a formal package dependency due to common installation complications.
+**Format Selection:**
+Set the `file_type` parameter in `scprep_parameters.csv`:
+- `file_type="h5"` for H5 format (supports multimodal data like CITE-seq/ATAC-seq)
+- `file_type="mtx"` for MTX format (RNA expression data only)
+
+#### Dependencies:
+**scprep** requires the following R packages:
+- **Seurat** (>= 3.0.0): For reading 10X Genomics data formats and Seurat object creation
+- **Matrix** (>= 1.2-0): For sparse matrix operations  
+- **Biobase**: For ExpressionSet data structures
+- **SingleCellExperiment**: For SingleCellExperiment object creation
+- **R** (>= 4.0.0): Minimum R version
+
+**Note:** All dependencies are automatically installed when using `devtools::install_github()` or the Docker container.
+
+***
+
+## Output Object Types
+
+**scprep** now supports three different output object types:
+
+### 🔹 **ExpressionSet** (Default)
+- Traditional Bioconductor S4 object for storing expression data
+- Metadata stored in `pData()` and `fData()` slots
+- Compatible with Bioconductor workflows
+- Maintains full backward compatibility
+
+### 🔹 **Seurat** 
+- Popular single-cell analysis framework object
+- Metadata stored in `meta.data` slot
+- Ready for Seurat downstream analysis workflows
+- Supports multi-modal data (protein, VDJ)
+
+### 🔹 **SingleCellExperiment**
+- Modern Bioconductor S4 object for single-cell data
+- Metadata stored in `colData()` slot
+- Compatible with Bioconductor/scater workflows
+- Supports alternative experiments (protein data)
 
 ***
 
 ## Overview
 
-Template function to aggregate gene counts matrices from multiple samples, store aggregated counts matrices and metadata (for samples and genes) in an "ExpressionSet" S4 object, add biomaRt gene annotation, perform cell filtering, and calculate select QC metrics.
-```
+Template function to aggregate gene counts matrices from multiple samples, store aggregated counts matrices and metadata (for samples and genes) in an ExpressionSet, Seurat, or SingleCellExperiment object, add biomaRt gene annotation, perform cell filtering, and calculate select QC metrics.
+
+**Output type is specified in the `scprep_parameters.csv` file:**
+```r
 library(Biobase)
 
 # Output type determined by output_type parameter in scprep_parameters.csv
@@ -109,13 +151,17 @@ dataset <- scprep::template_scprep(dir_output=dir_output)
 <details>
 	<summary>Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet, Seurat, or SingleCellExperiment object. Add sample metadata from scprep_annotation.csv to the object metadata. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the object metadata. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the object.</summary>
 <pre>
-# Build ExpressionSet object with GEX counts and cell metadata
+# Build Seurat object with RNA data (no additional modalities)
 dataset <- scprep::scprep_eset_build(
-	sample_paths=sample_paths,
+	sample_paths="path/to/sample",
 	annotation=annotation,
-	vdj=vdj,
-	cite=cite,
-	atac=atac)
+	gene_id="symbol"
+	output_type="seurat",
+	vdj=FALSE,
+	cite=FALSE,
+	cite_ignore=TRUE,
+	atac=FALSE,
+	atac_ignore=TRUE)
 </pre>
 </details>
 

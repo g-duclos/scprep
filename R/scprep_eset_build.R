@@ -3,14 +3,19 @@
 #' This function builds an ExpressionSet, Seurat, or SingleCellExperiment object with scRNA data
 #' @param sample_paths Character vector of paths to filtered_feature_bc_matrix.h5 for all samples in project
 #' @param annotation Matrix of project-specific annotation.csv
+#' @param file_type File type ("h5" or "mtx"); if "mtx", the following files must be in sample directory: matrix.mtx, barcodes.tsv, genes.tsv or features.tsv
+#' @param gene_id Gene ID type ("ensembl" or "symbol")
 #' @param vdj Data is multimodal RNA & VDJ
 #' @param cite Data is multimodal RNA & Protein
 #' @param cite_ignore FALSE to ignore; Default is TRUE, ignore the "Antibody Capture" slot in the h5 file input and only extract/store the "Gene Expression" slot; This is only relevant if your data contains both RNA and protein modalities and you want to ignore the protein modality
 #' @param atac Data is multimodal RNA & ATAC
-#' @return ExpressionSet object containing expression data for all samples & annotation in pData slot & UMIs/Genes per cell
+#' @param atac_ignore FALSE to ignore; Default is TRUE, ignore the "ATAC" slot in the h5 file input and only extract/store the "Gene Expression" slot; This is only relevant if your data contains both RNA and ATAC modalities and you want to ignore the ATAC modality
+#' @param output_type Output object type ("eset" (ExpressionSet), "seurat", or "sce" (SingleCellExperiment))
+#' @return ExpressionSet, Seurat, or SingleCellExperiment object containing expression data for all samples & annotation
 #' @export
 #' @examples
-#' scprep_eset_build(sample_paths=sample_paths, annotation=annotation, file_type="h5", vdj=vdj, cite=cite, atac=atac)
+#' # Build ExpressionSet (default)
+#' dataset <- scprep_eset_build(sample_paths=sample_paths, annotation=annotation, file_type="h5", gene_id="symbol", vdj=vdj, cite=cite, atac=atac)
 #
 scprep_eset_build <- function(
 	sample_paths=sample_paths,
@@ -19,9 +24,15 @@ scprep_eset_build <- function(
 	gene_id="symbol",
 	vdj=vdj,
 	cite=cite,
-	atac=atac) {
+	cite_ignore=TRUE,
+	atac=atac,
+	atac_ignore=TRUE,
+	output_type="eset") {
 	#
-	cat("Build ExpressionSet", "\n")
+	cat("Building", output_type, "object", "\n")
+	
+	# Set use.names parameter based on gene_id preference
+	use_names <- ifelse(gene_id == "symbol", TRUE, FALSE)
 	#
 	if (vdj == FALSE) {
 		#
@@ -345,17 +356,79 @@ scprep_eset_build <- function(
 	metadata_df$UMIs <- colSums(counts.all)
 
 	cat("Calculate Genes per cell", "\n")
-	dataset$Genes <- unlist(lapply(1:ncol(exprs(dataset)), function(x) {
-		return(length(rownames(exprs(dataset))[which(exprs(dataset)[,x] >= 1)]))
+	metadata_df$Genes <- unlist(lapply(1:ncol(counts.all), function(x) {
+		return(length(rownames(counts.all)[which(counts.all[,x] >= 1)]))
 	}))
 
-	# Define additional assayData slots
-	assayData(dataset)$Params <- list()
-	assayData(dataset)$Seurat <- list()
-	assayData(dataset)$QC <- list()
-	assayData(dataset)$Secondary <- list()
-	#
-	return(dataset)
+	# Create object based on output type
+	if (output_type == "seurat") {
+		cat("Creating Seurat object directly", "\n")
+		# Create Seurat object directly
+		dataset <- Seurat::CreateSeuratObject(
+			counts = counts.all,
+			meta.data = metadata_df
+		)
+		# Add protein data if available
+		if (cite == TRUE && cite_ignore == FALSE && exists("counts.cite.all")) {
+			dataset[["Protein"]] <- Seurat::CreateAssayObject(counts = counts.cite.all)
+		}
+		# Add VDJ data if available (store in misc slot)
+		if (vdj == TRUE && exists("vdj.list")) {
+			dataset@misc$VDJ <- vdj.list
+		}
+		#
+		cat("Seurat object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
+		return(dataset)
+		#
+	} else if (output_type == "sce") {
+		cat("Creating SingleCellExperiment object directly", "\n")
+		# Create SingleCellExperiment object directly
+		dataset <- SingleCellExperiment::SingleCellExperiment(
+			assays = list(counts = counts.all),
+			colData = metadata_df
+		)
+		# Add protein data if available
+		if (cite == TRUE && cite_ignore == FALSE && exists("counts.cite.all")) {
+			SingleCellExperiment::altExp(dataset, "Protein") <- SingleCellExperiment::SingleCellExperiment(
+				assays = list(counts = counts.cite.all)
+			)
+		}
+		# Add VDJ data if available (store in metadata)
+		if (vdj == TRUE && exists("vdj.list")) {
+			S4Vectors::metadata(dataset)$VDJ <- vdj.list
+		}
+		#
+		cat("SingleCellExperiment object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
+		return(dataset)
+		#
+	} else {
+		# Create ExpressionSet object (when output_type == "eset")
+		cat("Creating ExpressionSet object directly", "\n")
+		dataset <- new("ExpressionSet")
+		
+		# Set up expression data
+		assayData.list <- list()
+		assayData.list$exprs <- counts.all
+		Biobase::assayData(dataset) <- as.environment(assayData.list)
+		
+		# Set up phenotype data
+		Biobase::pData(dataset) <- metadata_df
+		
+		# Add multimodal data to assayData slots
+		if (cite == TRUE && cite_ignore == FALSE && exists("counts.cite.all")) {
+			Biobase::assayData(dataset)$Protein <- list()
+			Biobase::assayData(dataset)$Protein["Counts"] <- list(Matrix::Matrix(counts.cite.all, sparse=TRUE))
+		}
+		#
+		if (vdj == TRUE && exists("vdj.list")) {
+			Biobase::assayData(dataset)$VDJ <- list()
+			Biobase::assayData(dataset)$VDJ["VDJ"] <- list(vdj.list)
+		}
+		#		
+		cat("ExpressionSet object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
+		return(dataset)
+		#
+	}
 	#
 }
 #
