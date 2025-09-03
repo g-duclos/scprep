@@ -5,11 +5,11 @@
 #' @return Random seeds
 #' @export
 #' @examples
-#' scprep_eset_seeds(n.seeds=1000)
+#' scprep_seeds(n.seeds=1000)
 #
 
 #
-scprep_eset_seeds <- function(
+scprep_seeds <- function(
 	n.seeds=n.seeds) {
 	#
 	seeds <- round(sample(1:1e8, n.seeds, replace=FALSE))

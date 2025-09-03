@@ -45,8 +45,8 @@ docker-compose up scprep-rstudio
 ```
 
 **Docker Image Features:**
-- Pre-installed R 4.0.0+ with all required dependencies
-- Seurat, Matrix, Biobase, and other dependencies configured
+- Pre-installed R 4.2.1+ with all required dependencies
+- Seurat v5, Matrix, Biobase, biomaRt, and other dependencies configured
 - Optimized for single-cell RNA-Seq workflows
 - Volume mounting for data input/output
 
@@ -99,7 +99,7 @@ Set the `file_type` parameter in `scprep_parameters.csv`:
 
 #### Dependencies:
 **scprep** requires the following R packages:
-- **Seurat** (>= 3.0.0): For reading 10X Genomics data formats and Seurat object creation
+- **Seurat** (>= 5.0.0): For reading 10X Genomics data formats and Seurat object creation
 - **Matrix** (>= 1.2-0): For sparse matrix operations  
 - **Biobase**: For ExpressionSet data structures
 - **SingleCellExperiment**: For SingleCellExperiment object creation
@@ -119,7 +119,7 @@ Set the `file_type` parameter in `scprep_parameters.csv`:
 - Compatible with Bioconductor workflows
 - Maintains full backward compatibility
 
-### 🔹 **Seurat** 
+### 🔹 **Seurat** (v5)
 - Popular single-cell analysis framework object
 - Metadata stored in `meta.data` slot
 - Ready for Seurat downstream analysis workflows
@@ -152,7 +152,7 @@ dataset <- scprep::template_scprep(dir_output=dir_output)
 	<summary>Read filtered_feature_matrix_bc.h5 file for each sample listed in scprep_annotation.csv into an ExpressionSet, Seurat, or SingleCellExperiment object. Add sample metadata from scprep_annotation.csv to the object metadata. Calculate transcripts ("UMIs") per cell and genes ("Genes") per cell (>=1 transcript detected) and add to the object metadata. If working with multi-modal RNA/V(D)J, CITE, or RNA/ATAC data, this function will also store the V(D)J, CITE ADT surface protein, or ATAC information in the object.</summary>
 <pre>
 # Build Seurat object with RNA data (no additional modalities)
-dataset <- scprep::scprep_eset_build(
+dataset <- scprep::scprep_build(
 	sample_paths="path/to/sample",
 	annotation=annotation,
 	gene_id="symbol"
@@ -170,7 +170,7 @@ dataset <- scprep::scprep_eset_build(
 	<summary>Add gene-level metadata to the object (Ensembl ID, gene ID, chromosome #, chromosome start, chromosome stop, biotype) using the <a href="https://bioconductor.org/packages/release/bioc/html/biomaRt.html">biomaRt R package</a>. Calculate transcripts per cell derived from each biotype and chromosome and add to the object's cell-level metadata slot.</summary>
 <pre>
 # Add gene-level metadata to the object
-dataset <- scprep::scprep_eset_biomart(
+dataset <- scprep::scprep_biomart(
 	dataset=dataset,
 	ensembl_target=ensembl_target,
 	reference=reference)

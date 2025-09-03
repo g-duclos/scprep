@@ -9,7 +9,10 @@
 #' @return Sample-specific Cell, Dead, & Debris assignment
 #' @export
 #' @examples
-#' scprep_cell_filter(dataset=object, sample=sample, min_umi=100, min_gene=0, max_mito=0.2)
+#' \dontrun{
+#' # Assuming you have an ExpressionSet object called 'eset' and sample name
+#' scprep_cell_filter(dataset=eset, sample="Sample1", min_umi=100, min_gene=0, max_mito=0.2)
+#' }
 
 #
 scprep_cell_filter <- function(
@@ -33,7 +36,7 @@ scprep_cell_filter <- function(
 
 	# Extract metadata based on object type
 	if (object_type == "ExpressionSet") {
-		cell_data <- pData(dataset)
+		cell_data <- Biobase::pData(dataset)
 		cell_ids <- cell_data$ID
 	} else if (object_type == "Seurat") {
 		cell_data <- dataset@meta.data

@@ -8,7 +8,10 @@
 #' @return Multi-sample Cell, Dead, & Debris assignment
 #' @export
 #' @examples
-#' scprep_cell_filter_multi(dataset=object, min_umi=100, min_gene=0, max_mito=0.2)
+#' \dontrun{
+#' # Assuming you have an ExpressionSet object called 'eset'
+#' scprep_cell_filter_multi(dataset=eset, min_umi=100, min_gene=0, max_mito=0.2)
+#' }
 #
 #
 scprep_cell_filter_multi <- function(
@@ -27,7 +30,7 @@ scprep_cell_filter_multi <- function(
 		cell_data <- as.data.frame(SummarizedExperiment::colData(dataset))
 	} else if ("ExpressionSet" %in% class(dataset)) {
 		object_type <- "ExpressionSet"
-		cell_data <- pData(dataset)
+		cell_data <- Biobase::pData(dataset)
 	} else {
 		stop("Unsupported object type. Please provide ExpressionSet, Seurat, or SingleCellExperiment object.")
 	}
@@ -64,7 +67,7 @@ scprep_cell_filter_multi <- function(
 		#
 	} else if ("SingleCellExperiment" %in% class(dataset)) {
 		#
-		SummarizedExperiment::colData(dataset)$Cell_Filter <- as.factor(cell_filter_assignment)
+		SummarizedExperiment::colData(dataset)$Cell_Filter <- as.factor(cell.filter.out)
 		#
 	} else if ("ExpressionSet" %in% class(dataset)) {
 		#

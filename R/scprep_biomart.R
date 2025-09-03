@@ -7,11 +7,14 @@
 #' @return Object of same type as input containing annotated feature data
 #' @export
 #' @examples
-#' scprep_eset_biomart(dataset=object, ensembl_target="hsapiens_gene_ensembl", reference="refdata-cellranger-GRCh38-3.0.0")
+#' \dontrun{
+#' scprep_biomart(dataset=object, ensembl_target="hsapiens_gene_ensembl", 
+#'                reference="refdata-cellranger-GRCh38-3.0.0")
+#' }
 #
 
 #
-scprep_eset_biomart <- function(
+scprep_biomart <- function(
 	dataset=dataset,
 	ensembl_target=ensembl_target,
 	reference=reference) {
@@ -34,12 +37,12 @@ scprep_eset_biomart <- function(
 
 	# Extract expression matrix and row names based on object type
 	if (object_type == "ExpressionSet") {
-		expr_matrix <- exprs(dataset)
+		expr_matrix <- Biobase::exprs(dataset)
 		gene_names <- rownames(dataset)
 		cell_names <- colnames(dataset)
-		cell_data <- pData(dataset)
+		cell_data <- Biobase::pData(dataset)
 	} else if (object_type == "Seurat") {
-		expr_matrix <- Seurat::GetAssayData(dataset, slot = "counts")
+		expr_matrix <- Seurat::GetAssayData(dataset, layer = "counts")
 		gene_names <- rownames(dataset)
 		cell_names <- colnames(dataset)
 		cell_data <- dataset@meta.data
@@ -71,9 +74,9 @@ scprep_eset_biomart <- function(
 	# Add feature annotation to object based on type
 	if (object_type == "ExpressionSet") {
 		# Initialize featureData slot of ExpressionSet
-		fData(dataset) <- data.frame(row.names=gene_names)
+		Biobase::fData(dataset) <- data.frame(row.names=gene_names)
 		for (fdata in colnames(biomart_annotation)) {
-			fData(dataset)[[fdata]] <- biomart_annotation[intersect(rownames(biomart_annotation), gene_names), fdata]
+			Biobase::fData(dataset)[[fdata]] <- biomart_annotation[intersect(rownames(biomart_annotation), gene_names), fdata]
 		}
 	} else if (object_type == "Seurat") {
 		# Add feature metadata to Seurat object
@@ -81,7 +84,7 @@ scprep_eset_biomart <- function(
 		for (fdata in colnames(biomart_annotation)) {
 			feature_df[[fdata]] <- biomart_annotation[intersect(rownames(biomart_annotation), gene_names), fdata]
 		}
-		dataset[["RNA"]]@meta.features <- feature_df
+		dataset[["RNA"]][[]] <- feature_df
 	} else if (object_type == "SingleCellExperiment") {
 		# Add feature metadata to SCE object
 		feature_df <- data.frame(row.names = gene_names)
@@ -99,12 +102,12 @@ scprep_eset_biomart <- function(
 	for (biotype.var in biotype.vars) {
 		# Get biotype info based on object type
 		if (object_type == "ExpressionSet") {
-			biotypes <- unique(fData(dataset)[[biotype.var]])
-			feature_data <- fData(dataset)
+			biotypes <- unique(Biobase::fData(dataset)[[biotype.var]])
+			feature_data <- Biobase::fData(dataset)
 		} else if (object_type == "Seurat") {
-			if (biotype.var %in% colnames(dataset[["RNA"]]@meta.features)) {
-				biotypes <- unique(dataset[["RNA"]]@meta.features[[biotype.var]])
-				feature_data <- dataset[["RNA"]]@meta.features
+			if (biotype.var %in% colnames(dataset[["RNA"]][[]])) {
+				biotypes <- unique(dataset[["RNA"]][[]][[biotype.var]])
+				feature_data <- dataset[["RNA"]][[]]
 			} else {
 				next
 			}
@@ -156,15 +159,15 @@ scprep_eset_biomart <- function(
 	
 	# Get chromosome info based on object type  
 	if (object_type == "ExpressionSet") {
-		if ("Chr" %in% colnames(fData(dataset))) {
-			feature_chr <- fData(dataset)$Chr
+		if ("Chr" %in% colnames(Biobase::fData(dataset))) {
+			feature_chr <- Biobase::fData(dataset)$Chr
 		} else {
 			cat("Warning: Chr column not found in feature data, skipping chromosome quantification", "\n")
 			return(dataset)
 		}
 	} else if (object_type == "Seurat") {
-		if ("Chr" %in% colnames(dataset[["RNA"]]@meta.features)) {
-			feature_chr <- dataset[["RNA"]]@meta.features$Chr
+		if ("Chr" %in% colnames(dataset[["RNA"]][[]])){
+			feature_chr <- dataset[["RNA"]][[]]$Chr
 		} else {
 			cat("Warning: Chr column not found in feature data, skipping chromosome quantification", "\n")
 			return(dataset)

@@ -49,7 +49,7 @@ template_scprep <- function(
 
 	# Initiate data object
 	cat("Initiate", param.list[["output_type"]], "object", "\n")
-	dataset <- scprep::scprep_eset_build(
+	dataset <- scprep::scprep_build(
 		sample_paths=file.path(param.list[["dir_input"]], annotation$Sample_ID),
 		annotation=annotation,
 		file_type=param.list[["file_type"]],
@@ -63,7 +63,7 @@ template_scprep <- function(
 	
 	# BiomaRt Feature Annotation (now supports all object types)
 	cat("BiomaRt Feature Annotation of", param.list[["output_type"]], "object", "\n")
-	dataset <- scprep::scprep_eset_biomart(
+	dataset <- scprep::scprep_biomart(
 		dataset=dataset,
 		ensembl_target=param.list[["ensembl"]],
 		reference=unique(annotation[,"Reference"]))
@@ -99,7 +99,7 @@ template_scprep <- function(
 		#
 		cat("Store Parameters & Random Seeds in ExpressionSet assayData Params", "\n")
 		Biobase::assayData(dataset)$Params["scprep_Parameters"] <- list(param.list)
-		Biobase::assayData(dataset)$Params["Seeds"] <- list(scprep::scprep_eset_seeds(n.seeds=1000))
+		Biobase::assayData(dataset)$Params["Seeds"] <- list(scprep::scprep_seeds(n.seeds=1000))
 		
 		# Gene filtering for ExpressionSet
 		cat("Select Cells", "\n")

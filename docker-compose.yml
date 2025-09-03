@@ -15,14 +15,13 @@ services:
     command: R
     
   scprep-rstudio:
-    build: .
-    image: scprep:latest
+    image: rocker/rstudio:4.2.1
     container_name: scprep-rstudio
     volumes:
-      - ./data:/scprep/data
-      - ./output:/scprep/output
+      - .:/home/rstudio/scprep
+      - ./data:/home/rstudio/data
+      - ./output:/home/rstudio/output
     environment:
       - DISABLE_AUTH=true
     ports:
       - "8788:8787"
-    command: ["R", "-e", "rstudioapi::startRStudio()"]

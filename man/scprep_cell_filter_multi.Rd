@@ -27,5 +27,8 @@ Multi-sample Cell, Dead, & Debris assignment
 Across all samples (Sample designation in object metadata slot), this function designates high transcript/gene content & low percent mitochondrial content barcodes as "Cell", high percent mitochondrial content barcodes as "Dead", & low transcript/gene content barcodes as "Debris"
 }
 \examples{
-scprep_cell_filter_multi(dataset=object, min_umi=100, min_gene=0, max_mito=0.2)
+\dontrun{
+# Assuming you have an ExpressionSet object called 'eset'
+scprep_cell_filter_multi(dataset=eset, min_umi=100, min_gene=0, max_mito=0.2)
+}
 }

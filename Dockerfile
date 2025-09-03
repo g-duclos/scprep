@@ -1,5 +1,5 @@
-# Use the official R base image with Ubuntu
-FROM rocker/r-ver:4.0.0
+# Use the official R base image with Ubuntu  
+FROM rocker/r-ver:4.2.1
 
 # Set maintainer
 LABEL maintainer="grant.duclos@gmail.com"
@@ -19,10 +19,10 @@ RUN apt-get update && apt-get install -y \
 
 # Install Bioconductor and required R packages
 RUN R -e "install.packages('BiocManager')" \
-    && R -e "BiocManager::install('Biobase')" \
-    && R -e "install.packages(c('devtools', 'Matrix', 'remotes'))"
+    && R -e "BiocManager::install(c('Biobase', 'biomaRt', 'SingleCellExperiment', 'SummarizedExperiment', 'S4Vectors'))" \
+    && R -e "install.packages(c('devtools', 'Matrix', 'remotes', 'methods', 'utils'))"
 
-# Install Seurat (handling potential installation issues)
+# Install Seurat v5 (handling potential installation issues)
 RUN R -e "install.packages('Seurat')"
 
 # Create working directory

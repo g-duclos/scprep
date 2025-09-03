@@ -2,6 +2,7 @@
 #'
 #' This function builds an ExpressionSet, Seurat, or SingleCellExperiment object with scRNA data
 #' @param sample_paths Character vector of paths to filtered_feature_bc_matrix.h5 for all samples in project
+#' @param input_data Logical; Default is FALSE to ignore; if TRUE, input_data should be a list of pre-loaded count matrices (instead of file paths) - IMPORTANT: if you use this form of input, it will override 'sample_paths' argument! If the 'Sample_ID' column in annotation.csv does not match the names of the elements of this list, the 'annotation' input will be ignored and your metadata will only contain the names of the elements in this list (if the list elements are NOT named, they will be give numeric IDs corresponding to order of the list)
 #' @param annotation Matrix of project-specific annotation.csv
 #' @param file_type File type ("h5" or "mtx"); if "mtx", the following files must be in sample directory: matrix.mtx, barcodes.tsv, genes.tsv or features.tsv
 #' @param gene_id Gene ID type ("ensembl" or "symbol")
@@ -11,30 +12,101 @@
 #' @param atac Data is multimodal RNA & ATAC
 #' @param atac_ignore FALSE to ignore; Default is TRUE, ignore the "ATAC" slot in the h5 file input and only extract/store the "Gene Expression" slot; This is only relevant if your data contains both RNA and ATAC modalities and you want to ignore the ATAC modality
 #' @param output_type Output object type ("eset" (ExpressionSet), "seurat", or "sce" (SingleCellExperiment))
+#' @param verbose Logical; if TRUE (default), print progress messages; if FALSE, suppress output
 #' @return ExpressionSet, Seurat, or SingleCellExperiment object containing expression data for all samples & annotation
 #' @export
 #' @examples
+#' \dontrun{
 #' # Build ExpressionSet (default)
-#' dataset <- scprep_eset_build(sample_paths=sample_paths, annotation=annotation, file_type="h5", gene_id="symbol", vdj=vdj, cite=cite, atac=atac)
+#' dataset <- scprep_build(sample_paths=sample_paths, input_data=FALSE, annotation=annotation, 
+#'                              file_type="h5", gene_id="symbol", vdj=FALSE, 
+#'                              cite=FALSE, atac=FALSE)
+#' }
 #
-scprep_eset_build <- function(
-	sample_paths=sample_paths,
-	annotation=annotation,
+scprep_build <- function(
+	sample_paths=NULL,
+	input_data=FALSE,
+	annotation=NULL,
 	file_type="h5",
 	gene_id="symbol",
-	vdj=vdj,
-	cite=cite,
+	vdj=FALSE,
+	cite=FALSE,
 	cite_ignore=TRUE,
-	atac=atac,
+	atac=FALSE,
 	atac_ignore=TRUE,
-	output_type="eset") {
+	output_type="eset",
+	verbose=TRUE) {
 	#
-	cat("Building", output_type, "object", "\n")
+	if (verbose) cat("Building", output_type, "object", "\n")
+	
+	# Handle input_data parameter when provided as list of matrices
+	if (!isFALSE(input_data) && is.list(input_data)) {
+		if (verbose) cat("Using pre-loaded count matrices from input_data", "\n")
+		
+		# Handle case where input_data list elements are named
+		if (is.null(names(input_data))) {
+			names(input_data) <- paste("Sample", 1:length(input_data), sep="_")
+			if (verbose) cat("Input data not named, assigning numeric IDs:", paste(names(input_data), collapse=", "), "\n")
+		}
+		
+		# Process input_data matrices
+		for (i in 1:length(input_data)) {
+			# Convert to matrix if needed
+			counts <- as.matrix(input_data[[i]])
+			
+			# Add sample suffix to cell barcodes
+			colnames(counts) <- paste(colnames(counts), "-", i, sep="")
+			
+			if (i == 1) {
+				counts.all <- counts
+				if (verbose) cat("Loaded matrix for", names(input_data)[i], ":", ncol(counts), "cells", "\n")
+			} else {
+				counts.all <- cbind(counts.all, counts)
+				if (verbose) cat("Loaded matrix for", names(input_data)[i], ":", ncol(counts), "cells", "\n")
+			}
+		}
+		
+		# Create annotation based on input_data names
+		sample_names <- names(input_data)
+		n.cells.per.sample <- sapply(input_data, ncol)
+		
+		# Check if annotation Sample_ID matches input_data names
+		if (!is.null(annotation) && all(sample_names %in% annotation$Sample_ID)) {
+			if (verbose) cat("Using provided annotation matching input_data names", "\n")
+			# Reorder annotation to match input_data order
+			annotation <- annotation[match(sample_names, annotation$Sample_ID), ]
+			
+			annot.all <- do.call(rbind, lapply(1:length(sample_names), function(i) {
+				return(sapply(1:ncol(annotation), function(x) {
+					return(rep(annotation[i, x], n.cells.per.sample[i]))
+				}))
+			}))
+			colnames(annot.all) <- c("Sample", colnames(annotation)[2:ncol(annotation)])
+		} else {
+			if (verbose) cat("Annotation Sample_ID does not match input_data names or annotation not provided", "\n")
+			if (verbose) cat("Creating minimal annotation from input_data names", "\n")
+			# Create minimal annotation from input_data names
+			annot.all <- do.call(rbind, lapply(1:length(sample_names), function(i) {
+				return(data.frame(Sample_ID = rep(sample_names[i], n.cells.per.sample[i]),
+								stringsAsFactors = FALSE))
+			}))
+			colnames(annot.all) <- "Sample"
+		}
+		rownames(annot.all) <- colnames(counts.all)
+		
+		if (verbose) cat("Total cells loaded:", ncol(counts.all), "\n")
+		
+		# Skip file reading logic and jump to metadata creation
+		skip_file_reading <- TRUE
+	} else {
+		skip_file_reading <- FALSE
+	}
 	
 	# Set use.names parameter based on gene_id preference
 	use_names <- ifelse(gene_id == "symbol", TRUE, FALSE)
 	#
-	if (vdj == FALSE) {
+	if (!skip_file_reading) {
+		if (vdj == FALSE) {
 		#
 		counts.file.name <- "filtered_feature_bc_matrix.h5"
 		#
@@ -87,32 +159,32 @@ scprep_eset_build <- function(
 			mat.barcodes <- unlist(strsplit(colnames(counts.all),"-"))
 			colnames(counts.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 			#
-			cat("Read Filtered GEX Matrix:", basename(sample_paths), "\n")
-			cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
+			if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths), "\n")
+			if (verbose) cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
 			#
 		} else if (cite == TRUE && cite_ignore == FALSE) {
 			#
 			counts.all <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=use_names)[["Gene Expression"]]))
-			cat("Read Filtered GEX Matrix:", basename(sample_paths), "\n")
+			if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths), "\n")
 			#
 			counts.cite.all <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=TRUE)[["Antibody Capture"]]))
-			cat("Read Filtered Surface Protein Matrix:", basename(sample_paths[i]), "\n")
+			if (verbose) cat("Read Filtered Surface Protein Matrix:", basename(sample_paths[i]), "\n")
 			#
 			mat.barcodes <- unlist(strsplit(colnames(counts.all),"-"))
 			colnames(counts.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 			colnames(counts.cite.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 			#
-			cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
+			if (verbose) cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
 			#
 		} else if (atac == TRUE && atac_ignore == FALSE && cite == FALSE) {
 			#
 			counts.all <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=use_names)[["Gene Expression"]]))
-			cat("Read Filtered GEX Matrix:", basename(sample_paths), "\n")
+			if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths), "\n")
 			#
 			mat.barcodes <- unlist(strsplit(colnames(counts.all),"-"))
 			colnames(counts.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 			#
-			cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
+			if (verbose) cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
 			#
 		} else {
 			# When cite_ignore=TRUE or atac_ignore=TRUE, only extract Gene Expression
@@ -139,8 +211,8 @@ scprep_eset_build <- function(
 			mat.barcodes <- unlist(strsplit(colnames(counts.all),"-"))
 			colnames(counts.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 			#
-			cat("Read Filtered GEX Matrix (ignoring multimodal data):", basename(sample_paths), "\n")
-			cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
+			if (verbose) cat("Read Filtered GEX Matrix (ignoring multimodal data):", basename(sample_paths), "\n")
+			if (verbose) cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
 		}
 		# Check if number of unique samples equals sample number specified in annotation
 		n.samples <- as.numeric(unique(mat.barcodes[seq(2,length(mat.barcodes),2)]))
@@ -152,7 +224,7 @@ scprep_eset_build <- function(
 				}))
 			#
 			annot.all <- do.call(rbind, lapply(n.samples, function(i) {
-				cat(n.barcodes[i], "Cells Detected in", annotation$Sample_ID[i], "\n")
+				if (verbose) cat(n.barcodes[i], "Cells Detected in", annotation$Sample_ID[i], "\n")
 				return(sapply(1:ncol(annotation), function(x) {
 					return(rep(annotation[i, x], n.barcodes[i]))
 				}))
@@ -161,7 +233,7 @@ scprep_eset_build <- function(
 			rownames(annot.all) <- colnames(counts.all)
 			#
 			} else {
-				cat("Matrix Sample Number Does NOT Match Sample Number Specified in Annotation!", "\n")
+				if (verbose) cat("Matrix Sample Number Does NOT Match Sample Number Specified in Annotation!", "\n")
 			}
 		#			
 		} else {
@@ -207,30 +279,30 @@ scprep_eset_build <- function(
 						mat.barcodes <- unlist(strsplit(colnames(counts.all),"-"))
 						colnames(counts.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 						#
-						cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
-						cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
+						if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
+						if (verbose) cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
 						#
 					} else if (cite == TRUE) {
 						counts.all <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=use_names)[["Gene Expression"]]))
-						cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
+						if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
 						#
 						counts.cite.all <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=TRUE)[["Antibody Capture"]]))
-						cat("Read Filtered Surface Protein Matrix:", basename(sample_paths[i]), "\n")
+						if (verbose) cat("Read Filtered Surface Protein Matrix:", basename(sample_paths[i]), "\n")
 						#
 						mat.barcodes <- unlist(strsplit(colnames(counts.all),"-"))
 						colnames(counts.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 						colnames(counts.cite.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 						#
-						cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
+						if (verbose) cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
 						#
 					} else if (atac == TRUE & cite == FALSE) {
 						counts.all <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=use_names)[["Gene Expression"]]))
-						cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
+						if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
 						#
 						mat.barcodes <- unlist(strsplit(colnames(counts.all),"-"))
 						colnames(counts.all) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 						#
-						cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
+						if (verbose) cat(ncol(counts.all), "Cells Detected in", basename(sample_paths[i]), "\n")
 						#
 					}
 					#
@@ -267,30 +339,30 @@ scprep_eset_build <- function(
 							mat.barcodes <- unlist(strsplit(colnames(counts),"-"))
 							colnames(counts) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 							#
-							cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
-							cat(ncol(counts), "Cells Detected in", basename(sample_paths[i]), "\n")
+							if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
+							if (verbose) cat(ncol(counts), "Cells Detected in", basename(sample_paths[i]), "\n")
 							#
 						} else if (cite == TRUE) {
 							counts <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=use_names)[["Gene Expression"]]))
-							cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
+							if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
 							#
 							counts.cite <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=TRUE)[["Antibody Capture"]]))
-							cat("Read Filtered Surface Protein Matrix:", basename(sample_paths[i]), "\n")
+							if (verbose) cat("Read Filtered Surface Protein Matrix:", basename(sample_paths[i]), "\n")
 							#
 							mat.barcodes <- unlist(strsplit(colnames(counts),"-"))
 							colnames(counts) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 							colnames(counts.cite) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 							#
-							cat(ncol(counts), "Cells Detected in", basename(sample_paths[i]), "\n")
+							if (verbose) cat(ncol(counts), "Cells Detected in", basename(sample_paths[i]), "\n")
 							#
 						} else if (atac == TRUE & cite == FALSE) {
 							counts <- suppressMessages(as.matrix(Seurat::Read10X_h5(dir_counts, use.names=use_names)[["Gene Expression"]]))
-							cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
+							if (verbose) cat("Read Filtered GEX Matrix:", basename(sample_paths[i]), "\n")
 							#
 							mat.barcodes <- unlist(strsplit(colnames(counts),"-"))
 							colnames(counts) <- paste(mat.barcodes[seq(1,length(mat.barcodes),2)], "-", i, sep="")
 							#
-							cat(ncol(counts), "Cells Detected in", basename(sample_paths[i]), "\n")
+							if (verbose) cat(ncol(counts), "Cells Detected in", basename(sample_paths[i]), "\n")
 							#
 						}
 						#
@@ -317,10 +389,10 @@ scprep_eset_build <- function(
 		if (length(sample_paths) == 1) {
 			#
 			if (file.exists(file.path(sample_paths, vdj.file.name)) == TRUE) {
-				cat("Read VDJ data:", vdj.file.name, "\n")
+				if (verbose) cat("Read VDJ data:", vdj.file.name, "\n")
 				vdj.list[as.character(basename(sample_paths))] <- list(read.csv(file.path(sample_paths, vdj.file.name)))
 			} else {
-				cat("VDJ data NOT found !!!", "\n")
+				if (verbose) cat("VDJ data NOT found !!!", "\n")
 			}
 			#
 		} else {
@@ -328,15 +400,16 @@ scprep_eset_build <- function(
 			for (i in 1:length(sample_paths)) {
 			#
 				if (file.exists(file.path(sample_paths, vdj.file.name)) == TRUE) {
-					cat("Read VDJ data:", vdj.file.name, "\n")
+					if (verbose) cat("Read VDJ data:", vdj.file.name, "\n")
 					#
 					vdj.list[as.character(basename(sample_paths[i]))] <- list(read.csv(file.path(sample_paths[i], vdj.file.name)))
 					#
 				} else {
-					cat("VDJ data NOT found !!!", "\n")
+					if (verbose) cat("VDJ data NOT found !!!", "\n")
 				}
 			}
 		}
+	}
 	}
 	
 	# Create common metadata data frame
@@ -352,17 +425,15 @@ scprep_eset_build <- function(
 	}
 	
 	# Calculate common QC metrics
-	cat("Calculate UMIs per cell", "\n")
+	if (verbose) cat("Calculate UMIs per cell", "\n")
 	metadata_df$UMIs <- colSums(counts.all)
 
-	cat("Calculate Genes per cell", "\n")
-	metadata_df$Genes <- unlist(lapply(1:ncol(counts.all), function(x) {
-		return(length(rownames(counts.all)[which(counts.all[,x] >= 1)]))
-	}))
+	if (verbose) cat("Calculate Genes per cell", "\n")
+	metadata_df$Genes <- colSums(counts.all > 0)
 
 	# Create object based on output type
 	if (output_type == "seurat") {
-		cat("Creating Seurat object directly", "\n")
+		if (verbose) cat("Creating Seurat object directly", "\n")
 		# Create Seurat object directly
 		dataset <- Seurat::CreateSeuratObject(
 			counts = counts.all,
@@ -377,11 +448,11 @@ scprep_eset_build <- function(
 			dataset@misc$VDJ <- vdj.list
 		}
 		#
-		cat("Seurat object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
+		if (verbose) cat("Seurat object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
 		return(dataset)
 		#
 	} else if (output_type == "sce") {
-		cat("Creating SingleCellExperiment object directly", "\n")
+		if (verbose) cat("Creating SingleCellExperiment object directly", "\n")
 		# Create SingleCellExperiment object directly
 		dataset <- SingleCellExperiment::SingleCellExperiment(
 			assays = list(counts = counts.all),
@@ -398,12 +469,12 @@ scprep_eset_build <- function(
 			S4Vectors::metadata(dataset)$VDJ <- vdj.list
 		}
 		#
-		cat("SingleCellExperiment object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
+		if (verbose) cat("SingleCellExperiment object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
 		return(dataset)
 		#
 	} else {
 		# Create ExpressionSet object (when output_type == "eset")
-		cat("Creating ExpressionSet object directly", "\n")
+		if (verbose) cat("Creating ExpressionSet object directly", "\n")
 		dataset <- new("ExpressionSet")
 		
 		# Set up expression data
@@ -425,7 +496,7 @@ scprep_eset_build <- function(
 			Biobase::assayData(dataset)$VDJ["VDJ"] <- list(vdj.list)
 		}
 		#		
-		cat("ExpressionSet object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
+		if (verbose) cat("ExpressionSet object created with", ncol(dataset), "cells and", nrow(dataset), "genes", "\n")
 		return(dataset)
 		#
 	}
