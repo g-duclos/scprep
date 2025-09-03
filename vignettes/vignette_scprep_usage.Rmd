@@ -365,9 +365,6 @@ gc()  # Force garbage collection
 # Run template workflow
 dataset <- scprep::template_scprep(dir_output = "/path/to/output")
 
-# Note: Advanced processing (biomaRt annotation, cell filtering) only available 
-# for ExpressionSet objects. For Seurat/SingleCellExperiment objects, the template
-# function will create the basic object and suggest using post-processing functions.
 ```
 
 **Template workflow benefits:**
@@ -387,21 +384,21 @@ dataset <- scprep::template_scprep(dir_output = "/path/to/output")
 
 ## Summary: Data Location by Object Type {-}
 
-| Data Type | ExpressionSet | Seurat | SingleCellExperiment |
-|-----------|---------------|---------|---------------------|
-| **Counts Matrix** | `exprs(obj)` | `GetAssayData(obj, slot="counts")` | `counts(obj)` |
-| **Cell Metadata** | `pData(obj)` | `obj@meta.data` | `colData(obj)` |
-| **Gene Metadata** | `fData(obj)` | `obj[["RNA"]]@meta.features` | `rowData(obj)` |
-| **Additional Assays** | `assayData(obj)$SlotName` | `obj[["AssayName"]]` | `assay(obj, "AssayName")` |
+| Data Type                | ExpressionSet                | Seurat                             | SingleCellExperiment        |
+|:-------------------------|:-----------------------------|:-----------------------------------|:----------------------------|
+| **Counts Matrix**        | `exprs(obj)`                 | `GetAssayData(obj, slot="counts")` | `counts(obj)`               |
+| **Cell Metadata**        | `pData(obj)`                 | `obj@meta.data`                    | `colData(obj)`              |
+| **Gene Metadata**        | `fData(obj)`                 | `obj[["RNA"]]@meta.features`       | `rowData(obj)`              |
+| **Additional Assays**    | `assayData(obj)$SlotName`    | `obj[["AssayName"]]`               | `assay(obj, "AssayName")`   |
 
 
 # Conclusion {-}
 
 The `scprep` package provides a unified interface for reading 10X Genomics single-cell data and converting it to the most popular single-cell object formats. Each object type has its own conventions for storing expression data, metadata, and additional assays:
 
-- **ExpressionSet**: Traditional Bioconductor format with `exprs()`, `pData()`, and `fData()`
-- **Seurat**: Popular format with `GetAssayData()`, `@meta.data`, and assay-specific slots
-- **SingleCellExperiment**: Modern Bioconductor standard with `counts()`, `colData()`, and `rowData()`
+- **ExpressionSet**: classic Bioconductor format with `exprs()`, `pData()`, and `fData()`
+- **Seurat**: the most commonly used single-cell R format with `GetAssayData()`, `@meta.data`, and assay-specific slots
+- **SingleCellExperiment**: the 2nd most commonly used single-cell R format with `counts()`, `colData()`, and `rowData()`
 
-Choose the object type that best fits your downstream analysis workflow. All three formats preserve the same underlying data but organize it according to their respective conventions.
+All three formats have the same information - choose the object type that works for your downstream analysis workflow
 

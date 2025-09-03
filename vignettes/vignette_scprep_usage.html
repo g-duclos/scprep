@@ -1731,8 +1731,8 @@ directories.</p>
 <span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="fu">rm</span>(PBMC_3p_10K, PBMC_5p_10K)</span>
 <span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="fu">gc</span>()  <span class="co"># Force garbage collection</span></span>
 <span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt;            used  (Mb) gc trigger   (Mb) limit (Mb)  max used   (Mb)</span></span>
-<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; Ncells  7122156 380.4   12343790  659.3         NA   8386361  447.9</span></span>
-<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; Vcells 19095787 145.7  146431901 1117.2      16384 158724668 1211.0</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; Ncells  7125065 380.6   12348257  659.5         NA   8389221  448.1</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; Vcells 19102559 145.8  146441264 1117.3      16384 158731440 1211.1</span></span>
 <span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a></span>
 <span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co"># We will create some fake sample paths for the purpose of this example, which will purely be stored in metadata (again, normally you would replace with your actual 10x data directories)</span></span>
 <span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>sample_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
@@ -1903,8 +1903,8 @@ understand where different types of data are stored.</p>
 <span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Genes per cell: min =&quot;</span>, <span class="fu">min</span>(eset<span class="sc">$</span>Genes), <span class="st">&quot;... max =&quot;</span>, <span class="fu">max</span>(eset<span class="sc">$</span>Genes)))</span>
 <span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Genes per cell: min = 75 ... max = 6883&quot;</span></span></code></pre></div>
 <pre><code>#&gt;            used  (Mb) gc trigger   (Mb) limit (Mb)  max used   (Mb)
-#&gt; Ncells  7139710 381.4   12343790  659.3         NA   8386361  447.9
-#&gt; Vcells 92365207 704.7  240946046 1838.3      16384 166201265 1268.1</code></pre>
+#&gt; Ncells  7142500 381.5   12348257  659.5         NA   8389221  448.1
+#&gt; Vcells 92371634 704.8  240955797 1838.4      16384 166206286 1268.1</code></pre>
 <hr />
 </div>
 </div>
@@ -2033,8 +2033,8 @@ where different types of data are stored.</p>
 <span id="cb6-83"><a href="#cb6-83" tabindex="-1"></a>}</span>
 <span id="cb6-84"><a href="#cb6-84" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Genes per cell: min = 75 ... max = 6883&quot;</span></span></code></pre></div>
 <pre><code>#&gt;            used  (Mb) gc trigger   (Mb) limit (Mb)  max used   (Mb)
-#&gt; Ncells  7167059 382.8   12343790  659.3         NA   8386361  447.9
-#&gt; Vcells 25964844 198.1  231372204 1765.3      16384 238935221 1823.0</code></pre>
+#&gt; Ncells  7169679 383.0   12348257  659.5         NA   8389221  448.1
+#&gt; Vcells 25970862 198.2  231381565 1765.4      16384 238941648 1823.0</code></pre>
 <hr />
 </div>
 </div>
@@ -2160,9 +2160,9 @@ where different types of data are stored.</p>
 <span id="cb9-86"><a href="#cb9-86" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Genes per cell: min =&quot;</span>, <span class="fu">min</span>(cell_metadata<span class="sc">$</span>Genes), <span class="st">&quot;max =&quot;</span>, <span class="fu">max</span>(cell_metadata<span class="sc">$</span>Genes)))</span>
 <span id="cb9-87"><a href="#cb9-87" tabindex="-1"></a>}</span>
 <span id="cb9-88"><a href="#cb9-88" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Genes per cell: min = 75 max = 6883&quot;</span></span></code></pre></div>
-<pre><code>#&gt;            used  (Mb) gc trigger   (Mb) limit (Mb)  max used   (Mb)
-#&gt; Ncells  7187233 383.9   12343790  659.3         NA   8984372  479.9
-#&gt; Vcells 92537773 706.1  231372204 1765.3      16384 238935221 1823.0</code></pre>
+<pre><code>#&gt;            used  (Mb) gc trigger   (Mb) limit (Mb)  max used (Mb)
+#&gt; Ncells  7189699 384.0   12348257  659.5         NA   8986802  480
+#&gt; Vcells 92543391 706.1  231381565 1765.4      16384 238941648 1823</code></pre>
 <hr />
 </div>
 </div>
@@ -2175,17 +2175,13 @@ where different types of data are stored.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Create parameter file (scprep_parameters.csv) with output_type specification</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co"># Parameters file should include:</span></span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co"># - dir_input: path to input directory</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># - dir_output: path to output directory  </span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co"># - output_type: &quot;ExpressionSet&quot;, &quot;Seurat&quot;, or &quot;SingleCellExperiment&quot;</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># - dir_output: path to output directory</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co"># - output_type: &quot;eset&quot; (ExpressionSet), &quot;seurat&quot;, or &quot;sce&quot; (SingleCellExperiment)</span></span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co"># - file_type: &quot;h5&quot; or &quot;mtx&quot;</span></span>
 <span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co"># - Other processing parameters...</span></span>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a></span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co"># Run template workflow</span></span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> scprep<span class="sc">::</span><span class="fu">template_scprep</span>(<span class="at">dir_output =</span> <span class="st">&quot;/path/to/output&quot;</span>)</span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a></span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co"># Note: Advanced processing (biomaRt annotation, cell filtering) only available </span></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co"># for ExpressionSet objects. For Seurat/SingleCellExperiment objects, the template</span></span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co"># function will create the basic object and suggest using post-processing functions.</span></span></code></pre></div>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> scprep<span class="sc">::</span><span class="fu">template_scprep</span>(<span class="at">dir_output =</span> <span class="st">&quot;/path/to/output&quot;</span>)</span></code></pre></div>
 <p><strong>Template workflow benefits:</strong> - Parameter file-driven
 approach for reproducible analyses - Automatic parameter logging and
 seed generation - Built-in biomaRt gene annotation - Cell filtering -
@@ -2200,43 +2196,43 @@ Gene filtering</p>
 <h2 class="unnumbered">Summary: Data Location by Object Type</h2>
 <table>
 <colgroup>
-<col width="19%" />
-<col width="26%" />
-<col width="16%" />
-<col width="37%" />
+<col width="21%" />
+<col width="24%" />
+<col width="29%" />
+<col width="23%" />
 </colgroup>
 <thead>
 <tr>
-<th>Data Type</th>
-<th>ExpressionSet</th>
-<th>Seurat</th>
-<th>SingleCellExperiment</th>
+<th align="left">Data Type</th>
+<th align="left">ExpressionSet</th>
+<th align="left">Seurat</th>
+<th align="left">SingleCellExperiment</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Counts Matrix</strong></td>
-<td><code>exprs(obj)</code></td>
-<td><code>GetAssayData(obj, slot=&quot;counts&quot;)</code></td>
-<td><code>counts(obj)</code></td>
+<td align="left"><strong>Counts Matrix</strong></td>
+<td align="left"><code>exprs(obj)</code></td>
+<td align="left"><code>GetAssayData(obj, slot=&quot;counts&quot;)</code></td>
+<td align="left"><code>counts(obj)</code></td>
 </tr>
 <tr>
-<td><strong>Cell Metadata</strong></td>
-<td><code>pData(obj)</code></td>
-<td><code>obj@meta.data</code></td>
-<td><code>colData(obj)</code></td>
+<td align="left"><strong>Cell Metadata</strong></td>
+<td align="left"><code>pData(obj)</code></td>
+<td align="left"><code>obj@meta.data</code></td>
+<td align="left"><code>colData(obj)</code></td>
 </tr>
 <tr>
-<td><strong>Gene Metadata</strong></td>
-<td><code>fData(obj)</code></td>
-<td><code>obj[[&quot;RNA&quot;]]@meta.features</code></td>
-<td><code>rowData(obj)</code></td>
+<td align="left"><strong>Gene Metadata</strong></td>
+<td align="left"><code>fData(obj)</code></td>
+<td align="left"><code>obj[[&quot;RNA&quot;]]@meta.features</code></td>
+<td align="left"><code>rowData(obj)</code></td>
 </tr>
 <tr>
-<td><strong>Additional Assays</strong></td>
-<td><code>assayData(obj)$SlotName</code></td>
-<td><code>obj[[&quot;AssayName&quot;]]</code></td>
-<td><code>assay(obj, &quot;AssayName&quot;)</code></td>
+<td align="left"><strong>Additional Assays</strong></td>
+<td align="left"><code>assayData(obj)$SlotName</code></td>
+<td align="left"><code>obj[[&quot;AssayName&quot;]]</code></td>
+<td align="left"><code>assay(obj, &quot;AssayName&quot;)</code></td>
 </tr>
 </tbody>
 </table>
@@ -2250,19 +2246,18 @@ popular single-cell object formats. Each object type has its own
 conventions for storing expression data, metadata, and additional
 assays:</p>
 <ul>
-<li><strong>ExpressionSet</strong>: Traditional Bioconductor format with
+<li><strong>ExpressionSet</strong>: classic Bioconductor format with
 <code>exprs()</code>, <code>pData()</code>, and
 <code>fData()</code></li>
-<li><strong>Seurat</strong>: Popular format with
-<code>GetAssayData()</code>, <code>@meta.data</code>, and assay-specific
-slots</li>
-<li><strong>SingleCellExperiment</strong>: Modern Bioconductor standard
-with <code>counts()</code>, <code>colData()</code>, and
-<code>rowData()</code></li>
+<li><strong>Seurat</strong>: the most commonly used single-cell R format
+with <code>GetAssayData()</code>, <code>@meta.data</code>, and
+assay-specific slots</li>
+<li><strong>SingleCellExperiment</strong>: the 2nd most commonly used
+single-cell R format with <code>counts()</code>, <code>colData()</code>,
+and <code>rowData()</code></li>
 </ul>
-<p>Choose the object type that best fits your downstream analysis
-workflow. All three formats preserve the same underlying data but
-organize it according to their respective conventions.</p>
+<p>All three formats have the same information - choose the object type
+that works for your downstream analysis workflow</p>
 </div>
 
 
