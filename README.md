@@ -113,19 +113,19 @@ Set the `file_type` parameter in `scprep_parameters.csv`:
 
 **scprep** now supports three different output object types:
 
-### 🔹 **ExpressionSet** (Default)
+### **ExpressionSet** (Default)
 - Traditional Bioconductor S4 object for storing expression data
 - Metadata stored in `pData()` and `fData()` slots
 - Compatible with Bioconductor workflows
 - Maintains full backward compatibility
 
-### 🔹 **Seurat** (v5)
+### **Seurat** (v5)
 - Popular single-cell analysis framework object
 - Metadata stored in `meta.data` slot
 - Ready for Seurat downstream analysis workflows
 - Supports multi-modal data (protein, VDJ)
 
-### 🔹 **SingleCellExperiment**
+### **SingleCellExperiment**
 - Modern Bioconductor S4 object for single-cell data
 - Metadata stored in `colData()` slot
 - Compatible with Bioconductor/scater workflows
