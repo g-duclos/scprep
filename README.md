@@ -54,7 +54,7 @@ docker-compose up scprep-rstudio
 
 ## Documentation
 
-📖 **[Complete Usage Guide & Object Types Vignette](https://g-duclos.github.io/scprep/articles/vignette_scprep_usage.html)** - Comprehensive guide demonstrating how to read 10X data, convert between object types, and explore data structure
+📖 **[Complete Usage Guide & Object Types Overview Vignette](https://g-duclos.github.io/scprep/articles/vignette_scprep_usage.html)** - Guide demonstrating how to read 10X data, convert between object types, and explore data structure
 
 ***
 
@@ -114,22 +114,19 @@ Set the `file_type` parameter in `scprep_parameters.csv`:
 **scprep** now supports three different output object types:
 
 ### **ExpressionSet** (Default)
-- Traditional Bioconductor S4 object for storing expression data
+- Classic Bioconductor S4 object for storing expression data
 - Metadata stored in `pData()` and `fData()` slots
 - Compatible with Bioconductor workflows
-- Maintains full backward compatibility
 
 ### **Seurat** (v5)
-- Popular single-cell analysis framework object
+- Popular single-cell analysis object
 - Metadata stored in `meta.data` slot
 - Ready for Seurat downstream analysis workflows
-- Supports multi-modal data (protein, VDJ)
 
 ### **SingleCellExperiment**
-- Modern Bioconductor S4 object for single-cell data
+- New(er) (than ExpressionSet) Bioconductor S4 object for single-cell data
 - Metadata stored in `colData()` slot
 - Compatible with Bioconductor/scater workflows
-- Supports alternative experiments (protein data)
 
 ***
 
