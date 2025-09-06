@@ -54,7 +54,7 @@ docker-compose up scprep-rstudio
 
 ## Documentation
 
-📖 **[Complete Usage Guide & Object Types Vignette](https://htmlpreview.github.io/?https://github.com/g-duclos/scprep/blob/main/vignettes/vignette_scprep_usage.html)** - Comprehensive guide demonstrating how to read 10X data, convert between object types, and explore data structure
+📖 **[Complete Usage Guide & Object Types Vignette](https://g-duclos.github.io/scprep/articles/vignette_scprep_usage.html)** - Comprehensive guide demonstrating how to read 10X data, convert between object types, and explore data structure
 
 ***
 
