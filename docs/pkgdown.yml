@@ -1,0 +1,7 @@
+pandoc: 3.7.0.2
+pkgdown: 2.0.5
+pkgdown_sha: ~
+articles:
+  vignette_scprep_usage: vignette_scprep_usage.html
+last_built: 2025-09-06T03:35Z
+
