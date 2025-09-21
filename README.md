@@ -24,6 +24,10 @@ For a containerized environment with all dependencies pre-installed:
 
 **Quick Start with Docker:**
 ```bash
+# Clone the repository
+git clone https://github.com/g-duclos/scprep.git
+cd scprep
+
 # Build the Docker image
 docker build -t scprep .
 
