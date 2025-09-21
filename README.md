@@ -20,12 +20,12 @@ devtools::install_github("g-duclos/scprep")
 ```
 
 ### Option 2: Docker Container (Recommended)
-For a containerized environment with all dependencies pre-installed:
-
-**Quick Start with Docker:**
+For a containerized environment with R 4.2.1 and all dependencies pre-installed:
 ```bash
 # Clone the repository
 git clone https://github.com/g-duclos/scprep.git
+
+# Navigate to 'scprep'
 cd scprep
 
 # Build the Docker image
@@ -33,26 +33,7 @@ docker build -t scprep .
 
 # Run interactive R session with scprep
 docker run -it --rm scprep
-
-# Run with data directory mounted
-docker run -it --rm -v /path/to/your/data:/scprep/data scprep
 ```
-
-**Using Docker Compose:**
-```bash
-# Start the scprep container
-docker-compose up scprep
-
-# For RStudio interface (optional)
-docker-compose up scprep-rstudio
-# Then navigate to http://localhost:8788
-```
-
-**Docker Image Features:**
-- Pre-installed R 4.2.1+ with all required dependencies
-- Seurat v5, Matrix, Biobase, biomaRt, and other dependencies configured
-- Optimized for single-cell RNA-Seq workflows
-- Volume mounting for data input/output
 
 ***
 
