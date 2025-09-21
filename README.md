@@ -25,7 +25,7 @@ For a containerized environment with R 4.2.1, **scprep**, and all dependencies p
 # Clone the repository
 git clone https://github.com/g-duclos/scprep.git
 
-# Navigate to 'scprep'
+# Navigate to directory with cloned 'scprep'
 cd scprep
 
 # Build the Docker image
