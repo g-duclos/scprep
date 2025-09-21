@@ -19,8 +19,8 @@ The **scprep** R package can be installed from Github using devtools:
 devtools::install_github("g-duclos/scprep")
 ```
 
-### Option 2: Docker Container (Recommended)
-For a containerized environment with R 4.2.1 and all dependencies pre-installed:
+### Option 2: Docker Container
+For a containerized environment with R 4.2.1, **scprep**, and all dependencies pre-installed:
 ```bash
 # Clone the repository
 git clone https://github.com/g-duclos/scprep.git
