@@ -126,16 +126,63 @@ template_scprep <- function(
 		cat("Save ExpressionSet", "\n")
 		saveRDS(dataset, file.path(dir_output, "ExpressionSet.rds"));
 		
-	} else {
-		# For Seurat and SingleCellExperiment objects
-		cat("Gene filtering is currently only available for ExpressionSet objects", "\n")
-		cat("BiomaRt annotation and cell filtering have been applied to your", param.list[["output_type"]], "object", "\n")
-		cat("For gene filtering, please use object-specific methods or convert to ExpressionSet", "\n")
-		
-		# Save object with appropriate filename
-		output_filename <- paste0(param.list[["output_type"]], ".rds")
-		cat("Save", param.list[["output_type"]], "\n")
-		saveRDS(dataset, file.path(dir_output, output_filename));
+	} else if (param.list[["output_type"]] == "seurat") {
+		# Gene filtering for Seurat
+		cat("Select Cells", "\n")
+		#
+		# Get counts matrix from Seurat object
+		counts_matrix <- Seurat::GetAssayData(dataset, slot = "counts")
+
+		if (is.na(param.list[["gene_filter"]])) {
+			#
+			cat(paste("Gene Filter = 'NA': >= 3 Transcripts Detected in Default of 0.1% of Cells", sep=""), "\n")
+			cat(paste("NOTE: ALL genes will be used as input", sep=""), "\n")
+			genes <- rownames(counts_matrix[,cells])[which(rowSums(counts_matrix[,cells] >= 3) >= ((0.1/100)*ncol(counts_matrix[,cells])))]
+			cat(paste("Expressed Genes:", length(genes), "/", nrow(counts_matrix)), "\n")
+		} else {
+			#
+			cat(paste("Gene Filter: >= 3 Transcripts Detected in ", param.list[["gene_filter"]], "% of Cells", sep=""), "\n")
+			genes <- rownames(counts_matrix[,cells])[which(rowSums(counts_matrix[,cells] >= 3) >= ((param.list[["gene_filter"]]/100)*ncol(counts_matrix[,cells])))]
+			cat(paste("Expressed Genes:", length(genes), "/", nrow(counts_matrix)), "\n")
+		}
+		#
+		expressed <- c(rep("Expressed", length(genes)), rep("Not_Expressed", length(setdiff(rownames(counts_matrix), genes))))
+		names(expressed) <- c(genes, setdiff(rownames(counts_matrix), genes))
+		#
+		dataset@assays$RNA@meta.features$Gene_Filter <- as.factor(expressed[rownames(counts_matrix)])
+
+		# Save Seurat object
+		cat("Save Seurat", "\n")
+		saveRDS(dataset, file.path(dir_output, "seurat.rds"));
+
+	} else if (param.list[["output_type"]] == "sce") {
+		# Gene filtering for SingleCellExperiment
+		cat("Select Cells", "\n")
+		#
+		# Get counts matrix from SCE object
+		counts_matrix <- SummarizedExperiment::assay(dataset, "counts")
+
+		if (is.na(param.list[["gene_filter"]])) {
+			#
+			cat(paste("Gene Filter = 'NA': >= 3 Transcripts Detected in Default of 0.1% of Cells", sep=""), "\n")
+			cat(paste("NOTE: ALL genes will be used as input", sep=""), "\n")
+			genes <- rownames(counts_matrix[,cells])[which(rowSums(counts_matrix[,cells] >= 3) >= ((0.1/100)*ncol(counts_matrix[,cells])))]
+			cat(paste("Expressed Genes:", length(genes), "/", nrow(counts_matrix)), "\n")
+		} else {
+			#
+			cat(paste("Gene Filter: >= 3 Transcripts Detected in ", param.list[["gene_filter"]], "% of Cells", sep=""), "\n")
+			genes <- rownames(counts_matrix[,cells])[which(rowSums(counts_matrix[,cells] >= 3) >= ((param.list[["gene_filter"]]/100)*ncol(counts_matrix[,cells])))]
+			cat(paste("Expressed Genes:", length(genes), "/", nrow(counts_matrix)), "\n")
+		}
+		#
+		expressed <- c(rep("Expressed", length(genes)), rep("Not_Expressed", length(setdiff(rownames(counts_matrix), genes))))
+		names(expressed) <- c(genes, setdiff(rownames(counts_matrix), genes))
+		#
+		SummarizedExperiment::rowData(dataset)$Gene_Filter <- as.factor(expressed[rownames(counts_matrix)])
+
+		# Save SingleCellExperiment object
+		cat("Save SingleCellExperiment", "\n")
+		saveRDS(dataset, file.path(dir_output, "sce.rds"));
 	}
 	
 	#
